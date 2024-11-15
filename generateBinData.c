@@ -1,0 +1,116 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+
+// 1 , 2
+const char* mem_instr[2] = {"LDR", "STR"};
+
+// 3, 4, 5, 6, 7, 8, 9
+const char* branch_instr[7] = {"BRZ", "BRN", "BRC", "BRO", "BRA", "JMP", "RET"};
+
+//10 - 27
+const char* alu_instr[18] = {"ADD", "SUB", "LSR", "LSL", "RSR", "RSL", "MOV", "MUL", "DIV",
+                "MOD", "AND", "OR", "XOR", "NOT", "CMP", "TST", "INC", "DEC"};
+
+//For reg X and Y
+const char reg[2][1] = {"X", "Y"};
+
+//Function to convert from decimal to binary
+void decimalToBinaryString(int num,int decimal_num, char *binary_str) {
+
+        // Inițializăm șirul de caractere cu zerouri pentru 6 biți și terminatorul de șir
+        for (int i = 0; i < num; i++) {
+            binary_str[i] = '0';
+        }
+        binary_str[num] = '\0'; // Terminatorul de șir
+
+        // Construim șirul binar de la dreapta la stânga
+        int index = num-1; // Ultimul index al șirului
+        while (decimal_num > 0 && index >= 0) {
+            binary_str[index] = (decimal_num % 2) ? '1' : '0';
+            decimal_num /= 2;
+            index--;
+        }
+}
+
+
+
+int main() {
+    FILE *file;
+
+    if((file = fopen("assembly.txt", "r")) == NULL){
+        printf("Error to open assembly.txt to read!");
+        exit(EXIT_FAILURE);
+    }
+
+    FILE *out;
+
+    if((out = fopen("res_in_bin.txt","w")) == NULL){
+        printf("Error to open res_in_bin.txt to write!");
+        exit(EXIT_FAILURE);
+    }
+
+    char assembly_line[256];  // Citirea unei linii
+    char instruction[10];     // Instrucțiunea
+    char registerName[10];    // Registrul (X sau Y)
+    int value;
+
+    char val_for_instr[7];    // Șir binar pentru instrucțiune (6 biți)
+    char val_for_reg[2];      // Valoare binară pentru registre (1 bit)
+    char val_for_imd[10];     // Valoare binară pentru numere (9 biți)
+
+    while ((fgets(assembly_line, sizeof(assembly_line), file)) != NULL) {
+        assembly_line[strcspn(assembly_line, "\n")] = '\0';
+
+        
+        char final_bin_line[17] = ""; 
+
+        if (sscanf(assembly_line, "%s %s #%d", instruction, registerName, &value) == 3) {
+            
+            decimalToBinaryString(9, value, val_for_imd);
+            
+            val_for_reg[0] = (strcmp(registerName, reg[0]) == 0) ? '0' : '1';
+            val_for_reg[1] = '\0';
+
+            
+            if (strcmp(instruction, mem_instr[0]) == 0) { // Pt LDR
+                decimalToBinaryString(6, 1, val_for_instr);
+            } else if (strcmp(instruction, mem_instr[1]) == 0) { //PT STR
+                decimalToBinaryString(6, 2, val_for_instr);
+            } else {
+                for (int i = 0; i < 18; i++) { //Aici is alu instruction si le scrie codu
+                    if (strcmp(alu_instr[i], instruction) == 0) {
+                        decimalToBinaryString(6, i + 10, val_for_instr);
+                        break;
+                    }
+                }
+            }
+        } else if (sscanf(assembly_line, "%s %s", instruction, registerName) == 2) {
+            val_for_reg[0] = (strcmp(registerName, reg[0]) == 0) ? '0' : '1';
+            val_for_reg[1] = '\0';
+
+            for (int i = 0; i < 7; i++) { //Pt branch instruction 
+                if (strcmp(branch_instr[i], instruction) == 0) {
+                    decimalToBinaryString(6, i + 3, val_for_instr);
+                    break;
+                }
+            }
+        } else {
+            printf("Error: Line format is incorrect.\n");
+            continue;
+        }
+
+        
+        strcat(final_bin_line, val_for_instr);
+        strcat(final_bin_line, val_for_reg);
+        strcat(final_bin_line, val_for_imd);
+
+        printf("Final: %s\n", final_bin_line);
+        fprintf(out,"%s\n",final_bin_line);
+    }
+
+    fclose(file);
+    fclose(out);
+    return 0;
+}
