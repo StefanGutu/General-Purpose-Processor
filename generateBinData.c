@@ -55,19 +55,22 @@ int main() {
     char instruction[10];     // Instrucțiunea
     char registerName[10];    // Registrul (X sau Y)
     int value;
+    int address; // adresa pt branch
 
     char val_for_instr[7];    // Șir binar pentru instrucțiune (6 biți)
     char val_for_reg[2];      // Valoare binară pentru registre (1 bit)
     char val_for_imd[10];     // Valoare binară pentru numere (9 biți)
+    char val_for_address[11]; // valoare binara pentru adresa (10 biti)
 
     while ((fgets(assembly_line, sizeof(assembly_line), file)) != NULL) {
         assembly_line[strcspn(assembly_line, "\n")] = '\0';
 
         
         char final_bin_line[17] = ""; 
+        int branch_or_no = 0;
 
         if (sscanf(assembly_line, "%s %s #%d", instruction, registerName, &value) == 3) {
-            
+            branch_or_no = 1;
             decimalToBinaryString(9, value, val_for_imd);
             
             val_for_reg[0] = (strcmp(registerName, reg[0]) == 0) ? '0' : '1';
@@ -86,9 +89,11 @@ int main() {
                     }
                 }
             }
-        } else if (sscanf(assembly_line, "%s %s", instruction, registerName) == 2) {
-            val_for_reg[0] = (strcmp(registerName, reg[0]) == 0) ? '0' : '1';
-            val_for_reg[1] = '\0';
+        } else if (sscanf(assembly_line, "%s %d", instruction, &address) == 2) {
+            branch_or_no = 2;
+            
+            decimalToBinaryString(10,address,val_for_address);
+
 
             for (int i = 0; i < 7; i++) { //Pt branch instruction 
                 if (strcmp(branch_instr[i], instruction) == 0) {
@@ -101,10 +106,15 @@ int main() {
             continue;
         }
 
-        
-        strcat(final_bin_line, val_for_instr);
-        strcat(final_bin_line, val_for_reg);
-        strcat(final_bin_line, val_for_imd);
+        if(branch_or_no == 1){
+
+            strcat(final_bin_line, val_for_instr);
+            strcat(final_bin_line, val_for_reg);
+            strcat(final_bin_line, val_for_imd);
+        }else if(branch_or_no == 2){
+            strcat(final_bin_line, val_for_instr);
+            strcat(final_bin_line, val_for_address);
+        }
 
         printf("Final: %s\n", final_bin_line);
         fprintf(out,"%s\n",final_bin_line);
