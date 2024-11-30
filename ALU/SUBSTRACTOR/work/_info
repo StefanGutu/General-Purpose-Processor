@@ -1,0 +1,67 @@
+m255
+K3
+13
+cModel Technology
+Z0 dC:\An3\ITSC\Proiect\SUBSTRACTOR
+vFSC1bit
+!s100 WNLRnHz51@QP4l;5o<n<f1
+IeM_U25UTUn:n[?Vd9W45M1
+V0kYI3R=X26e;F1M^A<7UY0
+Z1 w1732727321
+FFSC1bit.v
+Z2 8FSC16bit.v
+Z3 FFSC16bit.v
+L0 1
+Z4 OV;L;6.5b;42
+r1
+!s85 0
+31
+!s101 -O0
+o-O0
+n@f@s@c1bit
+vFSC4bit
+!s100 QJA4NB0^Qd[?TC[^F6z;E1
+IKJJ?fVk74TR??:cUiOWm91
+VTgSAORInCn3ndh;Sg]X[L3
+R1
+FFSC4bit.v
+R2
+R3
+L0 3
+R4
+r1
+!s85 0
+31
+!s101 -O0
+o-O0
+n@f@s@c4bit
+vFullSubtractor16bit
+!s100 ;fWjZzijKO8]6KbWK5h@L3
+IiTX_@=LFiH@?ae`BYX7UW1
+VH>2VTmTdBl<Dnz;BC_g:c1
+R1
+R2
+R3
+L0 3
+R4
+r1
+!s85 0
+31
+!s101 -O0
+o-O0
+n@full@subtractor16bit
+vFullSubtractor16bit_tb
+!s100 2Ok_I;REiZT]zghJFUk`h2
+IE<;5ZjA5=TJ5^VjhdV:2_0
+V5ROWYo7kZ:nR_NTCa>d=K2
+R1
+R2
+R3
+L0 39
+R4
+r1
+!s85 0
+31
+!s101 -O0
+o-O0
+n@full@subtractor16bit_tb

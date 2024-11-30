@@ -1,0 +1,50 @@
+m255
+K3
+13
+cModel Technology
+Z0 dC:\An3\ITSC\Proiect\ADDER
+vcarry_look_ahead_16bit_tb
+!s100 Xe3iiGb3EL<i9l5j5dh7k1
+IfK;B]IY<aW<oKQmP8Ia@n3
+V4SXh@^IQS[YI8l1LA50IT2
+Z1 w1732722474
+Z2 8CLA16bit.v
+Z3 FCLA16bit.v
+L0 34
+Z4 OV;L;6.5b;42
+r1
+!s85 0
+31
+!s101 -O0
+o-O0
+vCLA16bit
+!s100 753:If4U0M7S`7K<0jAHz3
+IFlbX6dem@KM]KdFA4EF[d0
+VYYh`FG=8[bPj]zhh@1h;71
+R1
+R2
+R3
+L0 3
+R4
+r1
+!s85 0
+31
+!s101 -O0
+o-O0
+n@c@l@a16bit
+vCLA4bit
+!s100 >[[k;P40FVCHk4OUc[Loh0
+I@<`?gK0zI1Xi0f5[?]F0b2
+V^SXLACF<fOYYOMSM=fB=e0
+R1
+FCLA4bit.v
+R2
+R3
+L0 1
+R4
+r1
+!s85 0
+31
+!s101 -O0
+o-O0
+n@c@l@a4bit
