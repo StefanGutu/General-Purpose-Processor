@@ -2,7 +2,7 @@
 
 module RSL16bit(
     input wire [15:0] inp,         
-    input wire [3:0] shift_value,  
+    input wire [15:0] shift_value,  
     input wire clk,                
     input wire rst,                
     output reg [15:0] out         
@@ -12,7 +12,7 @@ module RSL16bit(
         if (!rst) begin
             out <= 16'b0; 
         end else begin
-            out <= (inp << shift_value) | (inp >> (16 - shift_value));
+            out <= (inp << shift_value[3:0]) | (inp >> (16 - shift_value[3:0]));
         end
     end
 
@@ -21,7 +21,7 @@ endmodule
 module RSL16bit_tb;
 
     reg [15:0] inp;          // Intrare pe 16 biți
-    reg [3:0] shift_value;   // Valoare de shift pe 4 biți
+    reg [15:0] shift_value;   // Valoare de shift pe 4 biți
     reg clk, rst;            // Semnal de ceas și reset
     wire [15:0] out;         // Ieșire pe 16 biți
 
@@ -52,11 +52,11 @@ module RSL16bit_tb;
         $display("-------------------------------------------------------------");
 
         // Teste
-        run_test(16'b0000000000001011, 4'd4, 16'b0000000010110000); // PASSED
-        run_test(16'b1000000000001011, 4'd4, 16'b0000000010111000); // PASSED
-        run_test(16'b0000000000001111, 4'd4, 16'b0000000011110000); // PASSED
-        run_test(16'b1111111111111111, 4'd8, 16'b1111111111111111); // PASSED
-        run_test(16'b0000000000000001, 4'd1, 16'b0000000000000010); // PASSED
+        run_test(16'b0000000000001011, 16'd4, 16'b0000000010110000); // PASSED
+        run_test(16'b1000000000001011, 16'd4, 16'b0000000010111000); // PASSED
+        run_test(16'b0000000000001111, 16'd4, 16'b0000000011110000); // PASSED
+        run_test(16'b1111111111111111, 16'd8, 16'b1111111111111111); // PASSED
+        run_test(16'b0000000000000001, 16'd1, 16'b0000000000000010); // PASSED
 
         $display("-------------------------------------------------------------");
         $stop; // Oprește simularea
@@ -65,7 +65,7 @@ module RSL16bit_tb;
     // Task pentru rularea fiecărui test
     task run_test(
         input [15:0] test_in,
-        input [3:0] shift_val,
+        input [15:0] shift_val,
         input [15:0] expected_out
     );
         begin

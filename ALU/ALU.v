@@ -169,7 +169,7 @@ module FSM16bit(
 
     LSR16bit lsr_op (
         .inp(a), 
-        .shift_value(b[3:0]),
+        .shift_value(b),
         .clk(clk),
         .rst(rst),
         .out(lsr_result)
@@ -177,7 +177,7 @@ module FSM16bit(
 
     RSL16bit rsl_op (
         .inp(a), 
-        .shift_value(b[3:0]),
+        .shift_value(b),
         .clk(clk),
         .rst(rst),
         .out(rsl_result)
@@ -185,7 +185,7 @@ module FSM16bit(
 
     RSR16bit rsr_op (
         .inp(a), 
-        .shift_value(b[3:0]), 
+        .shift_value(b), 
         .clk(clk),
         .rst(rst),
         .out(rsr_result)
@@ -228,7 +228,7 @@ module FSM16bit(
                 endcase
             end
 
-            ADD, SUB, INC, DEC, MOD, AND, OR, XOR, NOT, MOV, LSL, LSR, RSL, RSR:
+            ADD, SUB, INC, DEC, MOD, AND, OR, XOR, NOT, MOV, LSL, LSR, RSL, RSR, DIV:
                 next_state = IDLE;
 
             MUL: begin
@@ -389,7 +389,6 @@ module tb_FSM16bit;
         b = 16'd7;
         #10;
         check_division_result("DIV", result, 16'd2, remainder, 16'd1); 
-
         // Test XOR
         #10;
         op_code = 5'b01011; // XOR

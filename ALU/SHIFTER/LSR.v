@@ -1,7 +1,7 @@
 `timescale 1ns / 1ps
 module LSR16bit(
     input wire [15:0] inp,
-    input wire [3:0] shift_value, 
+    input wire [15:0] shift_value, 
     input wire clk,          
     input wire rst,          
     output reg [15:0] out    
@@ -16,9 +16,9 @@ module LSR16bit(
             out <= 16'b0; // Resetare
         end else begin
             if (is_inp_negative) begin
-                out <= $signed(inp) >>> shift_value;
+                out <= $signed(inp) >>> shift_value[3:0];
             end else begin
-                out <= inp >> shift_value;
+                out <= inp >> shift_value[3:0];
             end
         end
     end
@@ -29,7 +29,7 @@ endmodule
 module LSR16bit_tb;
 
     reg [15:0] inp;           // Intrare pe 16 biți
-    reg [3:0] shift_value;    // Valoarea de deplasare (4 biți, maxim 15 poziții)
+    reg [15:0] shift_value;    // Valoarea de deplasare (4 biți, maxim 15 poziții)
     reg clk, rst;             // Semnale de ceas și reset
     wire [15:0] out;          // Ieșire pe 16 biți
 
@@ -59,22 +59,22 @@ module LSR16bit_tb;
         $display("-------------------------------------------------------------");
 
         // Teste pentru numere pozitive (deplasare logică dreapta)
-        run_test(16'b0000000000001011, 4'b0001, 16'b0000000000000101); // LSR: 11 >> 1 = 5
-        run_test(16'b0000000000110000, 4'b0010, 16'b0000000000001100); // LSR: 48 >> 2 = 12
-        run_test(16'b0000111100000000, 4'b0100, 16'b0000000011110000); // LSR: 3840 >> 4 = 240
+        run_test(16'b0000000000001011, 16'd1, 16'b0000000000000101); // LSR: 11 >> 1 = 5
+        run_test(16'b0000000000110000, 16'd2, 16'b0000000000001100); // LSR: 48 >> 2 = 12
+        run_test(16'b0000111100000000, 16'd4, 16'b0000000011110000); // LSR: 3840 >> 4 = 240
 
         // Teste pentru numere negative (deplasare aritmetică dreapta)
-        run_test(16'b1000000000001011, 4'b0001, 16'b1100000000000101); // ASR: -32757 >> 1 = -16379
-        run_test(16'b1111111110000000, 4'b0011, 16'b1111111111110000); // ASR: -128 >> 3 = -16
-        run_test(16'b1000111100000000, 4'b0100, 16'b1111100011110000); // ASR: -29248 >> 4 = -1828
+        run_test(16'b1000000000001011, 16'd1, 16'b1100000000000101); // ASR: -32757 >> 1 = -16379
+        run_test(16'b1111111110000000, 16'd3, 16'b1111111111110000); // ASR: -128 >> 3 = -16
+        run_test(16'b1000111100000000, 16'd4, 16'b1111100011110000); // ASR: -29248 >> 4 = -1828
 
         // Teste cu `shift_value = 0` (fără deplasare)
-        run_test(16'b0000000000001011, 4'b0000, 16'b0000000000001011); // Fără schimbare
-        run_test(16'b1111111111111111, 4'b0000, 16'b1111111111111111); // Fără schimbare (număr negativ)
+        run_test(16'b0000000000001011, 16'd0, 16'b0000000000001011); // Fără schimbare
+        run_test(16'b1111111111111111, 16'd0, 16'b1111111111111111); // Fără schimbare (număr negativ)
 
         // Teste cu deplasare maximă (15 poziții)
-        run_test(16'b0000000000110000, 4'b1111, 16'b0000000000000000); // LSR: 48 >> 15 = 0
-        run_test(16'b1000000000000001, 4'b1111, 16'b1111111111111111); // ASR: -32767 >> 15 = -1
+        run_test(16'b0000000000110000, 16'd15, 16'b0000000000000000); // LSR: 48 >> 15 = 0
+        run_test(16'b1000000000000001, 16'd15, 16'b1111111111111111); // ASR: -32767 >> 15 = -1
 
         $display("-------------------------------------------------------------");
         $stop; // Oprește simularea
@@ -83,7 +83,7 @@ module LSR16bit_tb;
     // Task pentru rularea fiecărui test
     task run_test(
         input [15:0] test_in,
-        input [3:0] test_shift,
+        input [15:0] test_shift,
         input [15:0] expected_out
     );
         begin
