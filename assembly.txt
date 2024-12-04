@@ -1,4 +1,0 @@
-ADD X #5
-ADD Y #29
-RSR X #3
-BRA 49
