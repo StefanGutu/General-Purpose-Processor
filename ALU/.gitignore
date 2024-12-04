@@ -1,4 +1,6 @@
 work
 
-*.wlf
+testcase
+
+vsim.wlf
 *.vstf
