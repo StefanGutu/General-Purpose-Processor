@@ -1,6 +1,7 @@
 module proces_data(
     input clk,
     input rst,
+    input read_line,
     input [15:0] line_data,
     output reg [5:0] opcode,                    //opcode will go to ALU
     output reg [1:0] reg_x_or_y,                //reg_x_or_y will have a block to choose which reg to activate
@@ -23,7 +24,7 @@ module proces_data(
             address_to_go <= 9'b0;
             value_extended <= 16'b0;
         end
-        else begin
+        else if(read_line == 1'b1) begin
             if(line_data[15:10] > 6'b000000 && line_data[15:10] <= 6'b000010) begin
                 type <= 2'b01;
 
@@ -73,7 +74,7 @@ module tb_proces_data;
     reg clk;
     reg rst;
     reg [15:0] line_data;
-
+    reg read_line;
     // Ieșiri
     wire [5:0] opcode;
     wire [1:0] reg_x_or_y;
@@ -85,6 +86,7 @@ module tb_proces_data;
     proces_data dut (
         .clk(clk),
         .rst(rst),
+        .read_line(read_line),
         .line_data(line_data),
         .opcode(opcode),
         .reg_x_or_y(reg_x_or_y),
@@ -100,11 +102,12 @@ module tb_proces_data;
     // Testbench
     initial begin
         // Resetare inițială
- 
+        read_line = 1'b0;
         line_data = 16'b0;
         rst = 1'b0; // Reset activat
         #100;
         rst = 1'b1; // Reset dezactivat
+        read_line = 1'b1;
         // Testare pentru tipul 2'b01 (<= 6'b000010)
         line_data = 16'b000010_0_000000001; // opcode=000001, reg_x_or_y=01, value=000000001
         #100;
