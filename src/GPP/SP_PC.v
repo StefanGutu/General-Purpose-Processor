@@ -25,7 +25,7 @@ module StackPointer (
 );
     always @(posedge clk or negedge reset) begin
         if (!reset)
-            sp_out <= 16'h0190; 
+            sp_out <= 16'h018F; 
         else if (push)
             sp_out <= sp_out - 16'h0001; 
         else if (pop)
