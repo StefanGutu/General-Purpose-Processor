@@ -4,10 +4,9 @@ module MOV16bit(
     input wire clk,             
     input wire rst,            
     input wire mov_enable,     
-    output reg [15:0] dest     
+    output reg [15:0] dest
 );
 
-  
     always @(posedge clk or negedge rst) begin
         if (!rst) begin
             dest <= 16'b0;

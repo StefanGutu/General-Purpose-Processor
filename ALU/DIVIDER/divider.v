@@ -1,30 +1,26 @@
 `timescale 1ns / 1ps
 module divider(
-    input [15:0] dividend,  
-    input [15:0] divisor, 
+    input [15:0] dividend,
+    input [15:0] divisor,
     input wire clk,
-    input wire rst,  
-    output reg [15:0] quotient,   
-    output reg [15:0] remainder  
+    input wire rst,
+    output reg [15:0] quotient,
+    output reg [15:0] remainder
 );
-
-always @(posedge clk or negedge rst) begin
-    if(!rst) begin
-        quotient <= 16'b0;
-        remainder <= 16'b0;
+    always @(posedge clk or negedge rst) begin
+        if (!rst) begin
+            quotient <= 16'b0;
+            remainder <= 16'b0;
+        end else begin
+            if (divisor != 16'b0) begin
+                quotient <= dividend / divisor;
+                remainder <= dividend % divisor;
+            end else begin
+                quotient <= 16'b0;
+                remainder <= 16'b0;
+            end
+        end
     end
-    else  begin
-      if (divisor != 16'b0) begin
-          quotient <= dividend / divisor;   
-          remainder <= dividend % divisor;  
-      end else begin
-          quotient <= 16'b0;   
-          remainder <= 16'b0;   
-      end
-
-    end
-end
-
 endmodule
 
 

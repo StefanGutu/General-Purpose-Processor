@@ -4,20 +4,21 @@ module MOD16bit(
     input wire [15:0] imp,  
     input wire clk,          
     input wire rst,          
-    output reg [15:0] result  
+    output reg [15:0] result
 );
 
     always @(posedge clk or negedge rst) begin
         if (!rst) begin
             result <= 16'b0;  
         end else if (imp != 16'b0) begin
-            result <= num % imp;  
+            result <= num % imp;                               
         end else begin
-            result <= 16'b0;  
+            result <= 16'b0;     
         end
     end
 
 endmodule
+
 
 module MOD16bit_tb;
 

@@ -9,7 +9,6 @@ module FullSubtractor16bit(a, b, bin, diff, bout, clk, rst);
     output reg bout;           
 
     wire b1, b2, b3;  
-
     wire [15:0] temp_diff;
     wire temp_bout;
 
@@ -19,20 +18,14 @@ module FullSubtractor16bit(a, b, bin, diff, bout, clk, rst);
     FSC4bit fs3 (.a(a[15:12]), .b(b[15:12]), .bin(b3),    .diff(temp_diff[15:12]), .bout(temp_bout));
 
     always @(posedge clk or negedge rst) begin
-
         if (!rst) begin
-
             diff <= 16'b0;
-
+            bout <= 0;
         end else begin
             diff <= temp_diff;
             bout <= temp_bout;
         end
-        
     end
-
-
-
 endmodule
 
 

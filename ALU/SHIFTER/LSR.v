@@ -4,7 +4,7 @@ module LSR16bit(
     input wire [15:0] shift_value, 
     input wire clk,          
     input wire rst,          
-    output reg [15:0] out    
+    output reg [15:0] out
 );
 
     wire is_inp_negative;
@@ -13,7 +13,7 @@ module LSR16bit(
 
     always @(posedge clk or negedge rst) begin
         if (!rst) begin
-            out <= 16'b0; // Resetare
+            out <= 16'b0;
         end else begin
             if (is_inp_negative) begin
                 out <= $signed(inp) >>> shift_value[3:0];

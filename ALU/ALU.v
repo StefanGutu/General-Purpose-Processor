@@ -20,6 +20,7 @@
 module FSM16bit(
     input wire clk,
     input wire rst,
+    input wire start,
     input wire mov_enable,
     input wire [5:0] op_code,  
     input wire [15:0] a,       
@@ -28,10 +29,14 @@ module FSM16bit(
     input wire cin,            
     output reg [15:0] result,
     output reg [15:0] remainder,
-    output reg bout,           
-    output reg busy            
+    output reg bout,
+    output reg cout,           
+    output reg busy,
+    output reg carry_flag,
+    output reg negative_flag,
+    output reg overflow_flag,
+    output reg zero_flag           
 );
-
 
     localparam IDLE = 6'b000000;  // IDLE
     localparam ADD  = 6'b000001;  // ADD
@@ -51,15 +56,17 @@ module FSM16bit(
     localparam RSL  = 6'b001111;  // RSL
     localparam RSR  = 6'b010000;  // RSR
     localparam DIV  = 6'b010001;  //DIV
+    localparam TST  = 6'b010010; //TST
 
     reg [5:0] current_state, next_state;
     reg start_mul;
     wire mul_busy;
 
     wire [15:0] add_result, sub_result, inc_result, dec_result, mod_result, div_result, remainder_res;
-    wire [15:0] and_result, or_result, xor_result, not_result, mov_result, mul_result;
+    wire [15:0] and_result, or_result, xor_result, not_result, mov_result, mul_result, cmp_result, tst_result;
     wire [15:0] lsl_result, lsr_result, rsl_result, rsr_result;
     wire sub_bout, add_cout;
+    wire neg_flag, ovf_flag, ze_flag, carr_flag;
 
     CLA16bit adder (
         .a(a),
@@ -191,6 +198,26 @@ module FSM16bit(
         .out(rsr_result)
     );
 
+    TST16bit tst_op(
+        .inp1(a),
+        .inp2(b),
+        .clk(clk),
+        .rst(rst),
+        .and_result(tst_result),
+        .overflow_flag(ovf_flag),
+        .zero_flag(ze_flag),
+        .negative_flag(neg_flag),
+        .carry_flag(carr_flag)
+    );
+
+    CMP16bit cmp_op (
+        .op1(a),
+        .op2(b),
+        .clk(clk),
+        .rst(rst),
+        .result(cmp_result)
+    );
+
 
     always @(posedge clk or negedge rst) begin
         if (!rst) begin
@@ -207,68 +234,72 @@ module FSM16bit(
         case (current_state)
             IDLE: begin
                 busy = 0;
-                case (op_code)
-                    ADD: next_state = ADD;
-                    SUB: next_state = SUB;
-                    INC: next_state = INC;
-                    DEC: next_state = DEC;
-                    MOD: next_state = MOD;
-                    AND: next_state = AND;
-                    OR: next_state = OR;
-                    XOR: next_state = XOR;
-                    NOT: next_state = NOT;
-                    MOV: next_state = MOV;
-                    LSL: next_state = LSL;
-                    LSR: next_state = LSR;
-                    RSL: next_state = RSL;
-                    RSR: next_state = RSR;
-                    MUL: next_state = MUL;
-                    DIV: next_state = DIV;
-                    default: next_state = IDLE;
-                endcase
-            end
-
-            ADD, SUB, INC, DEC, MOD, AND, OR, XOR, NOT, MOV, LSL, LSR, RSL, RSR, DIV:
-                next_state = IDLE;
-
-            MUL: begin
-                start_mul = 1;
-                if (!mul_busy) begin
-                    next_state = IDLE;
+                if (start) begin
+                    case (op_code)
+                        ADD: next_state = ADD;
+                        SUB: next_state = SUB;
+                        INC: next_state = INC;
+                        DEC: next_state = DEC;
+                        MOD: next_state = MOD;
+                        AND: next_state = AND;
+                        OR: next_state = OR;
+                        XOR: next_state = XOR;
+                        NOT: next_state = NOT;
+                        MOV: next_state = MOV;
+                        LSL: next_state = LSL;
+                        LSR: next_state = LSR;
+                        RSL: next_state = RSL;
+                        RSR: next_state = RSR;
+                        MUL: next_state = MUL;
+                        DIV: next_state = DIV;
+                        TST: next_state = TST;
+                        CMP: next_state = CMP;
+                        default: next_state = IDLE;
+                    endcase
                 end
             end
+
+            ADD, SUB, INC, DEC, MOD, AND, OR, XOR, NOT, MOV, LSL, LSR, RSL, RSR, DIV, MUL, TST, CMP:
+                next_state = IDLE;
         endcase
     end
 
-    // Ieșirea FSM
     always @(posedge clk or negedge rst) begin
         if (!rst) begin
             result <= 16'b0;
             remainder <= 16'b0;
-            bout <= 0;
+            bout <= 16'b0;
+            cout <= 16'b0;
+            overflow_flag <= 1'b0; 
+            negative_flag <= 1'b0; 
+            carry_flag <= 1'b0; 
+            zero_flag <= 1'b0;
         end else begin
             case (current_state)
-                ADD: result <= add_result;
-                SUB: begin result <= sub_result; bout <= sub_bout; end
-                INC: result <= inc_result;
-                DEC: result <= dec_result;
-                MOD: result <= mod_result;
-                AND: result <= and_result;
-                OR: result <= or_result;
-                XOR: result <= xor_result;
-                NOT: result <= not_result;
-                MOV: result <= mov_result;
-                LSL: result <= lsl_result;
-                LSR: result <= lsr_result;
-                RSL: result <= rsl_result;
-                RSR: result <= rsr_result;
-                MUL: result <= mul_result;
-                DIV: begin result <= div_result; remainder <= remainder_res; end
-                default: result <= result;
+                ADD: begin result <= add_result; cout <= add_cout; overflow_flag <= (a[15] == b[15]) && (add_result[15] != a[15]); negative_flag <= add_result[15]; carry_flag <= add_cout; zero_flag <= (add_result == 16'b0); end
+                SUB: begin result <= sub_result; bout <= sub_bout; overflow_flag <= (a[15] != b[15]) && (sub_result[15] != a[15]); negative_flag <= sub_result[15]; carry_flag <= sub_bout; zero_flag <= (sub_result == 16'b0); end
+                INC: begin result <= inc_result; overflow_flag <= (a[15] == 0 && inc_result[15] == 1); negative_flag <= inc_result[15]; carry_flag <= (a == 16'b1111111111111111); zero_flag <= (inc_result == 16'b0); end
+                DEC: begin result <= dec_result; overflow_flag <= (a[15] == 1 && dec_result[15] == 0); negative_flag <= dec_result[15]; carry_flag <= (a == 16'd0); zero_flag <= (dec_result == 16'b0); end
+                MOD: begin result <= mod_result; overflow_flag <= 1'b0; negative_flag <= mod_result[15]; carry_flag <= 1'b0; zero_flag <= (mod_result == 16'b0); end
+                AND: begin result <= and_result; overflow_flag <= 0; negative_flag <= and_result[15]; carry_flag <= 0; zero_flag <= (and_result == 16'b0); end
+                OR: begin result <= or_result; overflow_flag <= 16'b0; negative_flag <= or_result[15]; carry_flag <= 16'b0; zero_flag <= (or_result == 16'b0); end
+                XOR: begin result <= xor_result; overflow_flag <= 16'b0; negative_flag <= xor_result[15]; carry_flag <= 16'b0; zero_flag <= (xor_result == 16'b0); end
+                NOT: begin result <= not_result; overflow_flag <= 16'b0; negative_flag <= not_result[15]; carry_flag <= 16'b0; zero_flag <= (not_result == 16'b0); end
+                MOV: begin result <= mov_result; overflow_flag <= 16'b0; negative_flag <= mov_result[15]; carry_flag <= 16'b0; zero_flag <= (mov_result == 16'b0); end
+                LSL: begin result <= lsl_result; overflow_flag <= 16'b0; negative_flag <= lsl_result[15]; carry_flag <= a[15 - b[3:0]]; zero_flag <= (lsl_result == 16'b0); end
+                LSR: begin result <= lsr_result; overflow_flag <= 16'b0; negative_flag <= lsr_result[15]; carry_flag <= a[b[3:0] - 1]; zero_flag <= (lsr_result == 16'b0); end
+                RSL: begin result <= rsl_result; overflow_flag <= 16'b0; negative_flag <= rsl_result[15]; carry_flag <= 16'b0; zero_flag <= (rsl_result == 16'b0); end
+                RSR: begin result <= rsr_result; overflow_flag <= 16'b0; negative_flag <= rsr_result[15]; carry_flag <= 16'b0; zero_flag <= (rsr_result == 16'b0); end
+                MUL: begin result <= mul_result; overflow_flag <= (mul_result/a != b); negative_flag <= mul_result[15]; carry_flag <= (mul_result/a != b); zero_flag <= (mul_result == 16'b0); end
+                DIV: begin result <= div_result; remainder <= remainder_res; overflow_flag <= 0; negative_flag <= div_result[15]; carry_flag <= (remainder_res != 16'b0); zero_flag <= (div_result == 16'b0); end
+                CMP: begin result <= cmp_result; overflow_flag <= (a[15] != cmp_result[15]); negative_flag <= cmp_result[15]; carry_flag <= (b > a); zero_flag <= (cmp_result == 16'b0); end
+                TST: begin result <= tst_result; overflow_flag <= ovf_flag; negative_flag <= neg_flag; carry_flag <= carr_flag; zero_flag <= ze_flag; end
+                default: begin result <= result; overflow_flag <= overflow_flag; negative_flag <= negative_flag; carry_flag <= carry_flag; zero_flag <= zero_flag; end
             endcase
         end
     end
 endmodule
+
 
 `timescale 1ns / 1ps
 
@@ -277,6 +308,7 @@ module tb_FSM16bit;
     // Declarațiile semnalelor
     reg clk;
     reg rst;
+    reg start;
     reg [5:0] op_code;
     reg [15:0] a;
     reg [15:0] b;
@@ -285,13 +317,16 @@ module tb_FSM16bit;
     wire [15:0] result;
     wire bout;
     wire busy;
+    wire cout;
     reg mov_enable;
     wire [15:0] remainder;
+    wire zero_flag, overflow_flag, carry_flag, negative_flag;
 
     // Instanțierea modulului FSM
     FSM16bit fsm (
         .clk(clk),
         .rst(rst),
+        .start(start),
         .mov_enable(mov_enable),
         .op_code(op_code),
         .a(a),
@@ -300,8 +335,13 @@ module tb_FSM16bit;
         .cin(cin),
         .result(result),
         .remainder(remainder),
+        .cout(cout),
         .bout(bout),
-        .busy(busy)
+        .busy(busy),
+        .zero_flag(zero_flag),
+        .negative_flag(negative_flag),
+        .carry_flag(carry_flag),
+        .overflow_flag(overflow_flag)
     );
 
     // Generarea semnalului de ceas
@@ -317,6 +357,7 @@ module tb_FSM16bit;
         op_code = 6'b000000; // IDLE
         a = 16'b0;
         b = 16'b0;
+        start = 1;
         bin = 0;
         cin = 0;
 
@@ -333,7 +374,7 @@ module tb_FSM16bit;
         cin = 0;
         bin = 0;
         #10;
-        check_result("ADD", result, 16'd15); // Expect 10 + 5 = 15
+        check_result("ADD", result, 16'd15, overflow_flag, carry_flag, zero_flag, negative_flag); // Expect 10 + 5 = 15
 
         // Test SUB
         #10;
@@ -343,21 +384,21 @@ module tb_FSM16bit;
         cin = 0;
         bin = 0;
         #10;
-        check_result("SUB", result, 16'd10); // Expect 15 - 5 = 10
+        check_result("SUB", result, 16'd10, overflow_flag, carry_flag, zero_flag, negative_flag); // Expect 15 - 5 = 10
 
         // Test INC
         #10;
         op_code = 6'b000011; // INC
         a = 16'd10;
         #10;
-        check_result("INC", result, 16'd11); // Expect 10 + 1 = 11
+        check_result("INC", result, 16'd11, overflow_flag, carry_flag, zero_flag, negative_flag); // Expect 10 + 1 = 11
 
         // Test DEC
         #10;
         op_code = 6'b000100; // DEC
         a = 16'd10;
         #10;
-        check_result("DEC", result, 16'd9); // Expect 10 - 1 = 9
+        check_result("DEC", result, 16'd9, overflow_flag, carry_flag, zero_flag, negative_flag); // Expect 10 - 1 = 9
 
         // Test MOD
         #10;
@@ -365,7 +406,7 @@ module tb_FSM16bit;
         a = 16'd10;
         b = 16'd3;
         #10;
-        check_result("MOD", result, 16'd1); // Expect 10 % 3 = 1
+        check_result("MOD", result, 16'd1, overflow_flag, carry_flag, zero_flag, negative_flag); // Expect 10 % 3 = 1
 
         // Test AND
         #10;
@@ -373,7 +414,7 @@ module tb_FSM16bit;
         a = 16'd15;
         b = 16'd7;
         #10;
-        check_result("AND", result, 16'd7); // Expect 15 & 7 = 7
+        check_result("AND", result, 16'd7, overflow_flag, carry_flag, zero_flag, negative_flag); // Expect 15 & 7 = 7
 
         // Test OR
         #10;
@@ -381,28 +422,28 @@ module tb_FSM16bit;
         a = 16'd15;
         b = 16'd7;
         #10;
-        check_result("OR", result, 16'd15); // Expect 15 | 7 = 15
+        check_result("OR", result, 16'd15, overflow_flag, carry_flag, zero_flag, negative_flag); // Expect 15 | 7 = 15
 
         #10;
         op_code = 6'b010001; // OR
         a = 16'd15;
         b = 16'd7;
         #10;
-        check_division_result("DIV", result, 16'd2, remainder, 16'd1); 
+        check_division_result("DIV", result, 16'd2, remainder, 16'd1, overflow_flag, carry_flag, zero_flag, negative_flag); 
         // Test XOR
         #10;
         op_code = 6'b001011; // XOR
         a = 16'd15;
         b = 16'd7;
         #10;
-        check_result("XOR", result, 16'd8); // Expect 15 ^ 7 = 8
+        check_result("XOR", result, 16'd8, overflow_flag, carry_flag, zero_flag, negative_flag); // Expect 15 ^ 7 = 8
 
         // Test NOT
         #10;
         op_code = 6'b001001; // NOT
         a = 16'd10;
         #10;
-        check_result("NOT", result, 16'b1111111111110101); // Expect ~10
+        check_result("NOT", result, 16'b1111111111110101, overflow_flag, carry_flag, zero_flag, negative_flag); // Expect ~10
 
         // Test MOV
         #10;
@@ -410,7 +451,7 @@ module tb_FSM16bit;
         a = 16'd5;
         mov_enable = 1;    // Activăm semnalul de mutare
         #10;
-        check_result("MOV", result, 16'd5);
+        check_result("MOV", result, 16'd5, overflow_flag, carry_flag, zero_flag, negative_flag);
 
         // Test LSL
         #10;
@@ -418,7 +459,7 @@ module tb_FSM16bit;
         a = 16'd10;
         b = 16'd3; // Shift left by 3
         #10;
-        check_result("LSL", result, 16'd80); // Expect 10 << 3 = 80
+        check_result("LSL", result, 16'd80, overflow_flag, carry_flag, zero_flag, negative_flag); // Expect 10 << 3 = 80
 
         // Test LSR
         #10;
@@ -426,7 +467,7 @@ module tb_FSM16bit;
         a = 16'd10;
         b = 16'd3; // Shift right by 3
         #10;
-        check_result("LSR", result, 16'd1); // Expect 10 >> 3 = 1
+        check_result("LSR", result, 16'd1, overflow_flag, carry_flag, zero_flag, negative_flag); // Expect 10 >> 3 = 1
 
         // Test RSL
         #10;
@@ -434,7 +475,7 @@ module tb_FSM16bit;
         a = 16'd10;
         b = 16'd3; // Rotate left by 3
         #10;
-        check_result("RSL", result, 16'd80); // Expect rotated left by 3
+        check_result("RSL", result, 16'd80, overflow_flag, carry_flag, zero_flag, negative_flag); // Expect rotated left by 3
 
         // Test RSR
         #10;
@@ -442,19 +483,34 @@ module tb_FSM16bit;
         a = 16'd10;
         b = 16'd3; // Rotate right by 3
         #10;
-        check_result("RSR", result, 16'd16385); // Expect rotated right by 3
+        check_result("RSR", result, 16'd16385, overflow_flag, carry_flag, zero_flag, negative_flag); // Expect rotated right by 3
 
         // Test MUL
         #10;
         op_code = 6'b001100; // MUL
-        a = 16'd10;
-        b = 16'd5;
+        a = 16'd65535;
+        b = 16'd65535;
         #10;
-        check_result("MUL", result, 16'd50); // Expect 10 * 5 = 50
+        check_result("MUL", result, 16'b0000000000000001, overflow_flag, carry_flag, zero_flag, negative_flag); // Expect 10 * 5 = 50
 
+        //TEST CMP
+        #10;
+        op_code = 6'b000111;
+        a = 16'd4;
+        b = 16'd7;
+        #10;
+        check_result("CMP", result, 16'b1111111111111101, overflow_flag, carry_flag, zero_flag, negative_flag);
+
+        //Test TST
+        #10;
+        op_code = 6'b010010;
+        a = 16'd5;
+        b = 16'd7;
+        #10;
+        check_result("TST", result, 16'b0101, overflow_flag, carry_flag, zero_flag, negative_flag);
         // Test final check
         #10;
-        $stop; // Stop simularea
+        $stop;
     end
 
     // Task for checking results
@@ -462,11 +518,17 @@ module tb_FSM16bit;
         input [7*8:1] operation;
         input [15:0] actual_result;
         input [15:0] expected_result;
+        input overflow;
+        input carry;
+        input zero;
+        input negative;
         begin
             if (actual_result == expected_result) begin
-                $display("%s Test PASSED: Result = %d", operation, actual_result);
+                $display("%s Test PASSED: Result = %d, overflow = %b, carry = %b, zero = %b, negative = %b", 
+                         operation, actual_result, overflow, carry, zero, negative);
             end else begin
-                $display("%s Test FAILED: Expected = %d, Got = %d", operation, expected_result, actual_result);
+                $display("%s Test FAILED: Expected = %d, Got = %d, overflow = %b, carry = %b, zero = %b, negative = %b", 
+                         operation, expected_result, actual_result, overflow, carry, zero, negative);
             end
         end
     endtask
@@ -477,13 +539,17 @@ module tb_FSM16bit;
     input [15:0] expected_quotient;
     input [15:0] actual_remainder;
     input [15:0] expected_remainder;
+    input overflow_flag;
+    input carry_flag;
+    input zero_flag;
+    input negative_flag;
     begin
         if (actual_quotient == expected_quotient && actual_remainder == expected_remainder) begin
-            $display("%s Test PASSED: Quotient = %d, Expected Remainder = %d, Actual Remainder = %d",
-                     operation, actual_quotient, expected_remainder, actual_remainder);
+            $display("%s Test PASSED: Quotient = %d, Expected Remainder = %d, Actual Remainder = %d, overflow = %b, carry = %b, zero = %b, negative = %b",
+                     operation, actual_quotient, expected_remainder, actual_remainder, overflow_flag, carry_flag, zero_flag, negative_flag);
         end else begin
-            $display("%s Test FAILED: Expected Quotient = %d, Got Quotient = %d, Expected Remainder = %d, Got Remainder = %d",
-                     operation, expected_quotient, actual_quotient, expected_remainder, actual_remainder);
+            $display("%s Test FAILED: Expected Quotient = %d, Got Quotient = %d, Expected Remainder = %d, Got Remainder = %d, overflow = %b, carry = %b, zero = %b, negative = %b",
+                     operation, expected_quotient, actual_quotient, expected_remainder, actual_remainder, overflow_flag, carry_flag, zero_flag, negative_flag);
         end
     end
 endtask

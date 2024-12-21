@@ -1,15 +1,15 @@
 `include "ADDER/CLA4bit.v"
 `timescale 1ns / 1ps
-module CLA16bit(a,b, cin, sum,cout, clk, rst);
-input [15:0] a,b;
-input wire clk;
-input wire rst;
-input cin;
-output reg [15:0] sum;
-output reg cout;
-wire c1,c2,c3;
+module CLA16bit(a, b, cin, sum, cout, clk, rst);
+    input [15:0] a, b;
+    input wire clk;
+    input wire rst;
+    input cin;
+    output reg [15:0] sum;
+    output reg cout;
 
-    wire [15:0]temp_sum;
+    wire c1, c2, c3;
+    wire [15:0] temp_sum;
     wire temp_cout;
 
     CLA4bit cla1 (.a(a[3:0]), .b(b[3:0]), .cin(cin), .sum(temp_sum[3:0]), .cout(c1));
@@ -18,19 +18,16 @@ wire c1,c2,c3;
     CLA4bit cla4 (.a(a[15:12]), .b(b[15:12]), .cin(c3), .sum(temp_sum[15:12]), .cout(temp_cout));
 
     always @(posedge clk or negedge rst) begin
-
         if (!rst) begin
-
             sum <= 16'b0;
-
+            cout <= 0;
         end else begin
             sum <= temp_sum;
             cout <= temp_cout;
         end
-        
     end
-
 endmodule
+
 
 module carry_look_ahead_16bit_tb;
     reg [15:0] a, b;
