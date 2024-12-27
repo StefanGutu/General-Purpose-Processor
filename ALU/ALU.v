@@ -276,22 +276,22 @@ module FSM16bit(
             zero_flag <= 1'b0;
         end else begin
             case (current_state)
-                ADD: begin result <= add_result; cout <= add_cout; overflow_flag <= (a[15] == b[15]) && (add_result[15] != a[15]); negative_flag <= add_result[15]; carry_flag <= add_cout; zero_flag <= (add_result == 16'b0); end
-                SUB: begin result <= sub_result; bout <= sub_bout; overflow_flag <= (a[15] != b[15]) && (sub_result[15] != a[15]); negative_flag <= sub_result[15]; carry_flag <= sub_bout; zero_flag <= (sub_result == 16'b0); end
-                INC: begin result <= inc_result; overflow_flag <= (a[15] == 0 && inc_result[15] == 1); negative_flag <= inc_result[15]; carry_flag <= (a == 16'b1111111111111111); zero_flag <= (inc_result == 16'b0); end
-                DEC: begin result <= dec_result; overflow_flag <= (a[15] == 1 && dec_result[15] == 0); negative_flag <= dec_result[15]; carry_flag <= (a == 16'd0); zero_flag <= (dec_result == 16'b0); end
+                ADD: begin result <= add_result; cout <= add_cout; overflow_flag <= (add_result != {add_cout, add_result}); negative_flag <= add_result[15]; carry_flag <= add_cout; zero_flag <= (add_result == 16'b0); end
+                SUB: begin result <= sub_result; bout <= sub_bout; overflow_flag <= (sub_result != {sub_bout, sub_result}); negative_flag <= sub_result[15]; carry_flag <= sub_bout; zero_flag <= (sub_result == 16'b0); end
+                INC: begin result <= inc_result; overflow_flag <= (a == 16'b1111111111111111); negative_flag <= inc_result[15]; carry_flag <= (a == 16'b1111111111111111); zero_flag <= (inc_result == 16'b0); end
+                DEC: begin result <= dec_result; overflow_flag <= (a == 16'd0); negative_flag <= dec_result[15]; carry_flag <= (a == 16'd0); zero_flag <= (dec_result == 16'b0); end
                 MOD: begin result <= mod_result; overflow_flag <= 1'b0; negative_flag <= mod_result[15]; carry_flag <= 1'b0; zero_flag <= (mod_result == 16'b0); end
-                AND: begin result <= and_result; overflow_flag <= 0; negative_flag <= and_result[15]; carry_flag <= 0; zero_flag <= (and_result == 16'b0); end
-                OR: begin result <= or_result; overflow_flag <= 16'b0; negative_flag <= or_result[15]; carry_flag <= 16'b0; zero_flag <= (or_result == 16'b0); end
-                XOR: begin result <= xor_result; overflow_flag <= 16'b0; negative_flag <= xor_result[15]; carry_flag <= 16'b0; zero_flag <= (xor_result == 16'b0); end
-                NOT: begin result <= not_result; overflow_flag <= 16'b0; negative_flag <= not_result[15]; carry_flag <= 16'b0; zero_flag <= (not_result == 16'b0); end
-                MOV: begin result <= mov_result; overflow_flag <= 16'b0; negative_flag <= mov_result[15]; carry_flag <= 16'b0; zero_flag <= (mov_result == 16'b0); end
-                LSL: begin result <= lsl_result; overflow_flag <= 16'b0; negative_flag <= lsl_result[15]; carry_flag <= a[15 - b[3:0]]; zero_flag <= (lsl_result == 16'b0); end
-                LSR: begin result <= lsr_result; overflow_flag <= 16'b0; negative_flag <= lsr_result[15]; carry_flag <= a[b[3:0] - 1]; zero_flag <= (lsr_result == 16'b0); end
-                RSL: begin result <= rsl_result; overflow_flag <= 16'b0; negative_flag <= rsl_result[15]; carry_flag <= 16'b0; zero_flag <= (rsl_result == 16'b0); end
-                RSR: begin result <= rsr_result; overflow_flag <= 16'b0; negative_flag <= rsr_result[15]; carry_flag <= 16'b0; zero_flag <= (rsr_result == 16'b0); end
+                AND: begin result <= and_result; overflow_flag <= 1'b0; negative_flag <= and_result[15]; carry_flag <= 0; zero_flag <= (and_result == 16'b0); end
+                OR: begin result <= or_result; overflow_flag <= 1'b0; negative_flag <= or_result[15]; carry_flag <= 1'b0; zero_flag <= (or_result == 16'b0); end
+                XOR: begin result <= xor_result; overflow_flag <= 1'b0; negative_flag <= xor_result[15]; carry_flag <= 1'b0; zero_flag <= (xor_result == 16'b0); end
+                NOT: begin result <= not_result; overflow_flag <= 1'b0; negative_flag <= not_result[15]; carry_flag <= 1'b0; zero_flag <= (not_result == 16'b0); end
+                MOV: begin result <= mov_result; overflow_flag <= 1'b0; negative_flag <= mov_result[15]; carry_flag <= 1'b0; zero_flag <= (mov_result == 16'b0); end
+                LSL: begin result <= lsl_result; overflow_flag <= 1'b0; negative_flag <= lsl_result[15]; carry_flag <= a[15 - b[3:0]]; zero_flag <= (lsl_result == 16'b0); end
+                LSR: begin result <= lsr_result; overflow_flag <= 1'b0; negative_flag <= lsr_result[15]; carry_flag <= a[b[3:0] - 1]; zero_flag <= (lsr_result == 16'b0); end
+                RSL: begin result <= rsl_result; overflow_flag <= 1'b0; negative_flag <= rsl_result[15]; carry_flag <= 1'b0; zero_flag <= (rsl_result == 16'b0); end
+                RSR: begin result <= rsr_result; overflow_flag <= 1'b0; negative_flag <= rsr_result[15]; carry_flag <= 1'b0; zero_flag <= (rsr_result == 16'b0); end
                 MUL: begin result <= mul_result; overflow_flag <= (mul_result/a != b); negative_flag <= mul_result[15]; carry_flag <= (mul_result/a != b); zero_flag <= (mul_result == 16'b0); end
-                DIV: begin result <= div_result; remainder <= remainder_res; overflow_flag <= 0; negative_flag <= div_result[15]; carry_flag <= (remainder_res != 16'b0); zero_flag <= (div_result == 16'b0); end
+                DIV: begin result <= div_result; remainder <= remainder_res; overflow_flag <= (div_result * a != b); negative_flag <= div_result[15]; carry_flag <= (remainder_res != 16'b0); zero_flag <= (div_result == 16'b0); end
                 CMP: begin result <= cmp_result; overflow_flag <= (a[15] != cmp_result[15]); negative_flag <= cmp_result[15]; carry_flag <= (b > a); zero_flag <= (cmp_result == 16'b0); end
                 TST: begin result <= tst_result; overflow_flag <= ovf_flag; negative_flag <= neg_flag; carry_flag <= carr_flag; zero_flag <= ze_flag; end
                 default: begin result <= result; overflow_flag <= overflow_flag; negative_flag <= negative_flag; carry_flag <= carry_flag; zero_flag <= zero_flag; end
@@ -379,12 +379,12 @@ module tb_FSM16bit;
         // Test SUB
         #10;
         op_code = 6'b000010; // SUB
-        a = 16'd15;
+        a = 16'd0;
         b = 16'd5;
         cin = 0;
         bin = 0;
         #10;
-        check_result("SUB", result, 16'd10, overflow_flag, carry_flag, zero_flag, negative_flag); // Expect 15 - 5 = 10
+        check_result("SUB", result, 16'b1111111111111011, overflow_flag, carry_flag, zero_flag, negative_flag); // Expect 15 - 5 = 10
 
         // Test INC
         #10;
@@ -425,7 +425,7 @@ module tb_FSM16bit;
         check_result("OR", result, 16'd15, overflow_flag, carry_flag, zero_flag, negative_flag); // Expect 15 | 7 = 15
 
         #10;
-        op_code = 6'b010001; // OR
+        op_code = 6'b010001; // DIV
         a = 16'd15;
         b = 16'd7;
         #10;
