@@ -37,7 +37,6 @@ module instr_mem(
                 end 
                 instruction_data[counter_elem] = line_from_file[15:0]; //saves the line in memory
                 counter_elem = counter_elem + 1; //increment the position where to save
-                //need to add a checker when you are near 400
             end
             else if(read_memory == 1'b1) begin //signal to read from the memory
                 return_instr_line[15:0] = instruction_data[pos];    //with pos you specify where to read from instruction memory

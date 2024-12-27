@@ -4,7 +4,7 @@
 
 
 // 1 , 2
-const char* mem_instr[2] = {"LDR", "STR"};
+const char* mem_instr[4] = {"LDR", "STR", "STA", "LDA"};
 
 // 3, 4, 5, 6, 7, 8, 9
 const char* branch_instr[7] = {"BRZ", "BRN", "BRC", "BRO", "BRA", "JMP", "RET"};
@@ -84,7 +84,7 @@ int main() {
             } else {
                 for (int i = 0; i < 18; i++) { //Aici is alu instruction si le scrie codu
                     if (strcmp(alu_instr[i], instruction) == 0) {
-                        decimalToBinaryString(6, i + 10, val_for_instr);
+                        decimalToBinaryString(6, i + 12, val_for_instr);
                         break;
                     }
                 }
@@ -97,7 +97,7 @@ int main() {
 
             for (int i = 0; i < 7; i++) { //Pt branch instruction 
                 if (strcmp(branch_instr[i], instruction) == 0) {
-                    decimalToBinaryString(6, i + 3, val_for_instr);
+                    decimalToBinaryString(6, i + 5, val_for_instr);
                     break;
                 }
             }
