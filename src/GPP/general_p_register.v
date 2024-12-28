@@ -8,8 +8,8 @@ module general_purpose_registers (
     input reg_read_x,         // Control signal to read from register X
     input reg_read_y,         // Control signal to read from register Y
 	input reg_read_accumulator,// Control signal to read from register accumulator
-    output reg [15:0] data_out_x, // Data output from register X
-    output reg [15:0] data_out_y, // Data output from register Y
+    output reg [15:0] data_out, // Data output from register X sau Y
+    //output reg [15:0] data_out, // Data output from register Y
 	output reg [15:0] data_out_accumulator // Data output from register accumulator
 );
 
@@ -32,12 +32,12 @@ module general_purpose_registers (
 
     // Read operations
     always @(*) begin
-        if (reg_read_x) data_out_x = reg_x; // Read from register X
-        else data_out_x = 16'b0;           // Default output
-
-        if (reg_read_y) data_out_y = reg_y; // Read from register Y
-        else data_out_y = 16'b0;           // Default output
-		
+        if (reg_read_x) data_out= reg_x; // Read from register X
+        else 
+		begin		
+			if (reg_read_y) data_out= reg_y; // Read from register Y
+			else data_out = 16'b0;           // Default output
+		end
 		if (reg_read_accumulator) data_out_accumulator = reg_accumulator; // Read from register accumulator
         else data_out_accumulator = 16'b0;           // Default output
     end
@@ -58,8 +58,8 @@ module general_purpose_registers_tb;
     reg reg_read_x;
     reg reg_read_y;
     reg reg_read_accumulator;
-    wire [15:0] data_out_x;
-    wire [15:0] data_out_y;
+    wire [15:0] data_out;
+    //wire [15:0] data_out_y;
     wire [15:0] data_out_accumulator;
 
     // Instantiate the general-purpose registers module
@@ -73,8 +73,7 @@ module general_purpose_registers_tb;
         .reg_read_x(reg_read_x),
         .reg_read_y(reg_read_y),
         .reg_read_accumulator(reg_read_accumulator),
-        .data_out_x(data_out_x),
-        .data_out_y(data_out_y),
+        .data_out(data_out),
         .data_out_accumulator(data_out_accumulator)
     );
 
@@ -152,8 +151,8 @@ module general_purpose_registers_tb;
 
     // Monitor signals for debugging
     initial begin
-        $monitor("Time: %t | rst: %b | data_in: %h | write_x: %b | write_y: %b | write_accumulator: %b | read_x: %b | read_y: %b | read_accumulator: %b | data_out_x: %h | data_out_y: %h | data_out_accumulator: %h",
-                 $time, rst, data_in, reg_write_x, reg_write_y, reg_write_accumulator, reg_read_x, reg_read_y, reg_read_accumulator, data_out_x, data_out_y, data_out_accumulator);
+        $monitor("Time: %t | rst: %b | data_in: %h | write_x: %b | write_y: %b | write_accumulator: %b | read_x: %b | read_y: %b | read_accumulator: %b | data_out: %h | data_out_accumulator: %h",
+                 $time, rst, data_in, reg_write_x, reg_write_y, reg_write_accumulator, reg_read_x, reg_read_y, reg_read_accumulator, data_out, data_out_accumulator);
     end
 
 endmodule
