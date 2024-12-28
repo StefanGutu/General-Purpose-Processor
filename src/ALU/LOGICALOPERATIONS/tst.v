@@ -3,15 +3,15 @@ module TST16bit (
     input wire [15:0] inp1,      
     input wire [15:0] inp2,     
     input wire clk,              
-    input wire rst,              
+    input wire rst,
+    output reg [15:0] and_result,  //1 if eq 0 if not eq            
     output reg zero_flag,        
     output reg negative_flag,    
-    output reg carry_flag,      
+    output reg carry_flag,       
     output reg overflow_flag     
 );
 
-
-    reg [15:0] and_result;
+    
 
     always @(posedge clk or negedge rst) begin
         if (!rst) begin
@@ -23,8 +23,8 @@ module TST16bit (
             and_result <= inp1 & inp2;
             zero_flag <= (and_result == 16'b0);
             negative_flag <= and_result[15];
-            carry_flag <= carry_flag;
-            overflow_flag <= overflow_flag;
+            carry_flag <= 1'b0;
+            overflow_flag <= 1'b0; 
         end
     end
 endmodule
@@ -104,4 +104,3 @@ module TST16bit_tb;
     endtask
 
 endmodule
-

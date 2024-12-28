@@ -1,25 +1,20 @@
 `timescale 1ns / 1ps
 module multiplier(
-   a, b, out, clk, rst 
+    input [15:0] a,
+    input [15:0] b,
+    output reg [15:0] out,
+    input wire clk,
+    input wire rst
 );
-
-input [15:0] a;
-input [15:0] b;
-output reg [15:0] out;
-input wire clk;
-input wire rst;
-
-always @(posedge clk or negedge rst)
-begin
-    if(!rst)    
-        out <= 16'b0;
-    else
-        out <= a * b;
-        
-end
-
-
+    always @(posedge clk or negedge rst) begin
+        if (!rst) begin
+            out <= 16'b0;
+        end else begin
+            out <= a * b;
+        end
+    end
 endmodule
+
 
 module Testbench;
 
@@ -100,5 +95,3 @@ module Testbench;
     always #5 clk = ~clk;
 
 endmodule
-
-

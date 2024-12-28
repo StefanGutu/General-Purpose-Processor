@@ -3,14 +3,14 @@ module INC16bit(
     input wire [15:0] inp, 
     input wire clk,          
     input wire rst,        
-    output reg [15:0] out   
+    output reg [15:0] out
 );
 
     always @(posedge clk or negedge rst) begin
         if (!rst) begin
             out <= 16'b0; 
         end else begin
-            out <= inp + 1; 
+            out <= inp + 1;  
         end
     end
 
@@ -77,4 +77,3 @@ module INC16bit_tb;
     endtask
 
 endmodule
-

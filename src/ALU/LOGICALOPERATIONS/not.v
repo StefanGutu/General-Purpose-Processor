@@ -3,7 +3,7 @@ module NOT16bit(
     input wire [15:0] inp,  
     input wire clk,         
     input wire rst,         
-    output reg [15:0] out  
+    output reg [15:0] out
 );
 
     always @(posedge clk or negedge rst) begin
@@ -77,4 +77,3 @@ module NOT16bit_tb;
     endtask
 
 endmodule
-

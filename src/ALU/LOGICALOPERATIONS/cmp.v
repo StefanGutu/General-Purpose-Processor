@@ -1,37 +1,24 @@
 `timescale 1ns / 1ps
 module CMP16bit(
-    input wire [15:0] inp1, 
-    input wire [15:0] inp2,  
-    input wire clk,        
-    input wire rst,         
-    output reg equal,       
-    output reg greater,      
-    output reg less          
+    input wire [15:0] op1,       
+    input wire [15:0] op2,       
+    input wire clk,               
+    input wire rst,   
+    output reg [15:0] result            
 );
+           
 
     always @(posedge clk or negedge rst) begin
         if (!rst) begin
-            equal <= 0;
-            greater <= 0;
-            less <= 0;
+           result <= 16'b0;
         end else begin
-            if (inp1 == inp2) begin
-                equal <= 1;
-                greater <= 0;
-                less <= 0;
-            end else if (inp1 > inp2) begin
-                equal <= 0;
-                greater <= 1;
-                less <= 0;
-            end else begin
-                equal <= 0;
-                greater <= 0;
-                less <= 1;
-            end
+           result <= op1 - op2;
         end
     end
 
 endmodule
+
+
 
 module CMP16bit_tb;
 
@@ -102,4 +89,3 @@ module CMP16bit_tb;
     endtask
 
 endmodule
-

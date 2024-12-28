@@ -1,11 +1,10 @@
 `timescale 1ns / 1ps
-
 module RSL16bit(
     input wire [15:0] inp,         
     input wire [15:0] shift_value,  
     input wire clk,                
     input wire rst,                
-    output reg [15:0] out         
+    output reg [15:0] out   
 );
 
     always @(posedge clk or negedge rst) begin
