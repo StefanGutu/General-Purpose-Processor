@@ -1,4 +1,4 @@
-module mix_columns_16(
+module inv_mix_columns_16(
     input         clk,
     input         rst,
     input  [15:0] data_in,
@@ -22,55 +22,47 @@ module mix_columns_16(
         if (!rst) begin
             data_out <= 16'b0;
         end else begin
-            data_out[15:12] <= A ^ gf_mul_2(B) ^ C ^ gf_mul_3(D); 
-            data_out[11:8]  <= gf_mul_3(A) ^ B ^ gf_mul_2(C) ^ D;
-            data_out[7:4]   <= A ^ gf_mul_3(B) ^ C ^ gf_mul_2(D);
-            data_out[3:0]   <= gf_mul_2(A) ^ B ^ gf_mul_3(C) ^ D; 
+            data_out[15:12] <= A ^ gf_mul_3(B) ^ C ^ gf_mul_2(D); 
+            data_out[11:8]  <= gf_mul_2(A) ^ B ^ gf_mul_3(C) ^ D;
+            data_out[7:4]   <= A ^ gf_mul_2(B) ^ C ^ gf_mul_3(D);
+            data_out[3:0]   <= gf_mul_3(A) ^ B ^ gf_mul_2(C) ^ D; 
         end
     end
 endmodule
 
-module tb_mix_columns_16;
+
+module tb_inv_mix_columns_16;
     reg clk;
     reg rst;
     reg [15:0] data_in;
     wire [15:0] data_out;
-
-    // Instantiate the mix_columns_16 module
-    mix_columns_16 uut (
+    inv_mix_columns_16 uut (
         .clk(clk),
         .rst(rst),
         .data_in(data_in),
         .data_out(data_out)
     );
-
-    // Clock generation
     always begin
-        #5 clk = ~clk; // Toggle clock every 5 time units
+        #5 clk = ~clk;
     end
-
-    // Test sequence
     initial begin
-        // Initial values
         clk = 0;
         rst = 1;
         data_in = 16'h0000;
 
-
-        // Test with different input values
-        data_in = 16'h1234;  // Example input value (A=0x12, B=0x34)
+        data_in = 16'ha3c1;  // Example input value (A=0x12, B=0x34)
         #10;
-        $display("Input: 0x1234, Output: 0x%h", data_out);
+        $display("Input: 0xa3c1, Output: 0x%h", data_out);
 
-        data_in = 16'h9ABC;  // Example input value (A=0x9A, B=0xBC)
+        data_in = 16'h2b49;  // Example input value (A=0x9A, B=0xBC)
         #10;
-        $display("Input: 0x9ABC, Output: 0x%h", data_out);
+        $display("Input: 0x2b49, Output: 0x%h", data_out);
 
-        data_in = 16'hFEDC;  // Example input value (A=0xFE, B=0xDC)
+        data_in = 16'ha98b;  // Example input value (A=0xFE, B=0xDC)
         #10;
-        $display("Input: 0xFEDC, Output: 0x%h", data_out);
+        $display("Input: 0xa98b, Output: 0x%h", data_out);
 
-        data_in = 16'h0000;  // Test with zero input
+        data_in = 16'h0000;
         #10;
         $display("Input: 0x0000, Output: 0x%h", data_out);
 
@@ -78,11 +70,12 @@ module tb_mix_columns_16;
         #10;
         $display("Input: 0xFFFF, Output: 0x%h", data_out);
 
-        data_in = 16'h0707;  // Test with alternating bits input
+        data_in = 16'h7070;
         #10;
-        $display("Input: 0x0707, Output: 0x%h", data_out);
+        $display("Input: 0x7070, Output: 0x%h", data_out);
 
-        // End the simulation
         $finish;
     end
 endmodule
+
+
