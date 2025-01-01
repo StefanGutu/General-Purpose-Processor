@@ -1,6 +1,7 @@
 module inv_mix_columns_16(
     input         clk,
     input         rst,
+    input         inv_mix_col,
     input  [15:0] data_in,
     output reg [15:0] data_out
 );
@@ -22,10 +23,12 @@ module inv_mix_columns_16(
         if (!rst) begin
             data_out <= 16'b0;
         end else begin
-            data_out[15:12] <= A ^ gf_mul_3(B) ^ C ^ gf_mul_2(D); 
-            data_out[11:8]  <= gf_mul_2(A) ^ B ^ gf_mul_3(C) ^ D;
-            data_out[7:4]   <= A ^ gf_mul_2(B) ^ C ^ gf_mul_3(D);
-            data_out[3:0]   <= gf_mul_3(A) ^ B ^ gf_mul_2(C) ^ D; 
+            if(inv_mix_col == 1'b1) begin
+                data_out[15:12] <= A ^ gf_mul_3(B) ^ C ^ gf_mul_2(D); 
+                data_out[11:8]  <= gf_mul_2(A) ^ B ^ gf_mul_3(C) ^ D;
+                data_out[7:4]   <= A ^ gf_mul_2(B) ^ C ^ gf_mul_3(D);
+                data_out[3:0]   <= gf_mul_3(A) ^ B ^ gf_mul_2(C) ^ D; 
+            end
         end
     end
 endmodule

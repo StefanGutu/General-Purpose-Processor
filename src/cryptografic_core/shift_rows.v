@@ -1,5 +1,5 @@
 module shift_rows(
-    input clk, rst, dir,
+    input clk, rst, cript, decript,
     input [15:0] data_in,
     output reg [15:0] data_out
 );
@@ -8,11 +8,10 @@ module shift_rows(
         if (!rst) begin
             data_out <= 16'b0;
         end else begin
-            if (dir == 1) begin
-		//Right shift
+            if (cript == 1'b1) begin
                 data_out <= {data_in[0], data_in[15:1]};
-            end else begin
-		//Left shift
+            end 
+            else if (decript == 1'b1) begin   
                 data_out <= {data_in[14:0], data_in[15]};
             end
         end
