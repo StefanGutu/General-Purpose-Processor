@@ -284,7 +284,7 @@ module crypto_block(
     //Decript
     inv_mix_columns_16 inv_mix_columns_16_i(
         .clk(clk), .rst(rst),
-        .inv_mix_col(c6),
+        .inv_mix_col(c16),
         .data_in(xor_decript),
         .data_out(wire_from_mixcol_decript)
     );
