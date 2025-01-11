@@ -3,15 +3,21 @@
 #include <string.h>
 
 
-// 1 , 2
+// 1 , 2, 3, 4
 const char* mem_instr[4] = {"LDR", "STR", "STA", "LDA"};
 
-// 3, 4, 5, 6, 7, 8, 9
+// 5, 6, 7, 8, 9, 10, 11
 const char* branch_instr[7] = {"BRZ", "BRN", "BRC", "BRO", "BRA", "JMP", "RET"};
 
-//10 - 27
+//12 - 29
 const char* alu_instr[18] = {"ADD", "SUB", "LSR", "LSL", "RSR", "RSL", "MOV", "MUL", "DIV",
                 "MOD", "AND", "OR", "XOR", "NOT", "CMP", "TST", "INC", "DEC"};
+
+//30
+const char* crypto = {"CRP"};
+
+//31
+const char* end = {"HLT"};
 
 //For reg X and Y
 const char reg[2][1] = {"X", "Y"};
@@ -62,6 +68,8 @@ int main() {
     char val_for_imd[10];     // Valoare binară pentru numere (9 biți)
     char val_for_address[11]; // valoare binara pentru adresa (10 biti)
 
+    char end[17] = "0000000000000000";  //Valoare binara pentru end file (16 biti)
+
     while ((fgets(assembly_line, sizeof(assembly_line), file)) != NULL) {
         assembly_line[strcspn(assembly_line, "\n")] = '\0';
 
@@ -89,7 +97,7 @@ int main() {
                     }
                 }
             }
-        } else if (sscanf(assembly_line, "%s %d", instruction, &address) == 2) {
+        } else if (sscanf(assembly_line, "%s #%d", instruction, &address) == 2) {
             branch_or_no = 2;
             
             decimalToBinaryString(10,address,val_for_address);
@@ -101,7 +109,12 @@ int main() {
                     break;
                 }
             }
-        } else {
+        } else if (sscanf(assembly_line, "%s", instruction) == 1) {
+
+            branch_or_no = 3;
+
+            
+        }else {   
             printf("Error: Line format is incorrect.\n");
             continue;
         }
@@ -112,8 +125,11 @@ int main() {
             strcat(final_bin_line, val_for_reg);
             strcat(final_bin_line, val_for_imd);
         }else if(branch_or_no == 2){
+
             strcat(final_bin_line, val_for_instr);
             strcat(final_bin_line, val_for_address);
+        }else if ( branch_or_no == 3){
+            strcat(final_bin_line, end);
         }
 
         printf("Final: %s\n", final_bin_line);
