@@ -512,6 +512,8 @@ module control_unit(
 endmodule
 
 
+//Testbench
+
 module ControlUnit_tb();
 
     reg clk;
