@@ -6,17 +6,16 @@
 `include "../GPP/SP_PC.v"
 `include "../control_unit.v"
 
-//18
-
 module cpu_block(
     input clk,
     input rst,
     input bgn,
     input [15:0] key_inbus,
-    output reg c0,c1,c2,c3,c4,c5,c6,c7,c8,c9,c10,c11,c12,c13,c14,c15,c16,c17,c18,c19,c20,c21,c22,c23,
+    output reg c0,c1,c2,c3,c4,c5,c6,c7,c8,c9,c10,c11,c12,c13,c14,c15,c16,c17,c18,c19,c20,c21,c22,c23,c24,
     output reg fin_file_out,
     output reg fin_cript,
-    output reg [15:0] key_outbus
+    output reg [15:0] key_outbus,
+    output reg fin
 );
 
     //SP,PC and PC Counter wires
@@ -60,8 +59,9 @@ module cpu_block(
 
     //General p reg
     wire [3:0] wire_from_control_unit_reg_signal;                           //c4,c5,c6,c7
-    wire wire_from_control_unit_sta_signal;                                 //c10
+    wire wire_from_control_unit_sda_signal;                                 //c10
     wire wire_from_control_unit_lda_signal;                                 //c11
+    wire wire_from_control_unit_acc_save_after_alu;                         //c24
     //Crypto core reg
     wire wire_from_control_unit_load_data;                                  //c20
     wire wire_from_control_unit_store_data;                                 //c19
@@ -88,13 +88,15 @@ module cpu_block(
     //ALU
     wire wire_from_control_unit_start_alu_operation;                        //c17
     wire wire_from_control_unit_mov_enable;                                 //c18
-
+    //END
+    wire temp_fin;
 
     always @(posedge clk) begin
             //General p reg
-            {c4,c5,c6,c7}  <= wire_from_control_unit_reg_signal;                            //c4,c5,c6,c7
-            c10 <=  wire_from_control_unit_sta_signal;                                      //c10
+            {c4,c5,c6,c7} <= wire_from_control_unit_reg_signal;                             //c4,c5,c6,c7
+            c10 <= wire_from_control_unit_sda_signal;                                       //c10
             c11 <= wire_from_control_unit_lda_signal;                                       //c11
+            c24 <= wire_from_control_unit_acc_save_after_alu;                               //c24
             //Crypto core reg
             c20 <= wire_from_control_unit_load_data;                                        //c20
             c19 <= wire_from_control_unit_store_data;                                       //c19
@@ -124,7 +126,61 @@ module cpu_block(
 
             fin_file_out <= fin_file;
             fin_cript <= fin_crypto;
+            fin <= temp_fin;
     end
+
+    always @(posedge clk) begin
+        if(c14) begin
+            $display("Address : %b", wire_from_pc_counter);
+        end
+    end
+
+    control_unit control_unit_i(
+        .clk(clk), .rst(rst),
+        .bgn(bgn), 
+        .fin_crypto(fin_crypto),
+        .fin_file(fin_file),
+        .opcode(wire_from_instr_mem[15:10]),
+        .flags(wire_from_alu_flags),
+        .Alu_busy(wire_from_alu_busy),
+        .register(wire_from_instr_mem[9]),
+
+        .reg_signal(wire_from_control_unit_reg_signal),
+        .STA_signal(wire_from_control_unit_sda_signal),
+        .LDA_signal(wire_from_control_unit_lda_signal),
+        .signal_save_after_alu(wire_from_control_unit_acc_save_after_alu),
+
+        .Load_data(wire_from_control_unit_load_data),
+        .Store_data(wire_from_control_unit_store_data),
+
+        .mem_read(wire_from_control_unit_mem_read),
+        .mem_write(wire_from_control_unit_mem_write),
+
+        .start_crypt(wire_from_control_unit_start_crypt),
+        .start_decrypt(wire_from_control_unit_start_decrypt),
+        .start_execute_crypto(wire_from_control_unit_start_execute_crypto),
+
+        .read_file(wire_from_control_unit_read_file),
+        .read_memory(wire_from_control_unit_read_memory),
+
+        .PUSH(wire_from_control_unit_push),
+        .POP(wire_from_control_unit_pop),
+
+        .pc_save_address_from_instr_mem(wire_from_control_unit_pc_save_address_from_instr_mem),
+        .pc_save_address_from_data_mem(wire_from_control_unit_pc_save_address_from_data_mem),
+        .pc_save_address_from_counter(wire_from_control_unit_pc_save_address_from_counter),
+
+        .Increm_PC(wire_from_control_unit_increm_pc),
+        .get_address_from_pc(wire_from_control_unit_get_address_from_pc),
+
+        .Start_ALU_operation(wire_from_control_unit_start_alu_operation),
+        .mov_enable(wire_from_control_unit_mov_enable),
+
+        .fin(temp_fin)
+    );
+
+    
+
 
     StackPointer StackPointer_i(
         .clk(clk), .reset(rst),
@@ -174,7 +230,7 @@ module cpu_block(
         .mem_write(wire_from_control_unit_mem_writ),
         .read_data(wire_from_data_mem_for_reg_x_y),
 
-        .signal_acc_data_write(wire_from_control_unit_sta_signal),
+        .signal_acc_data_write(wire_from_control_unit_sda_signal),
         .acc_data(wire_from_general_p_reg_acc),
         .acc_read_data(wire_from_data_mem_for_reg_acc),
 
@@ -189,13 +245,32 @@ module cpu_block(
         .crypto_read_data(wire_from_data_mem_for_crypto)
     ); 
 
+    general_purpose_registers general_purpose_registers_i(
+        .clk(clk), .rst(rst),
+
+        .data_in(wire_from_data_mem_for_reg_x_y),
+        .data_in_acc_alu(wire_frm_alu_result_to_acc),
+        .data_in_acc_mem(wire_from_data_mem_for_reg_acc),
+
+        .signal_save_after_alu(wire_from_control_unit_acc_save_after_alu),
+        .reg_write_x(wire_from_control_unit_reg_signal[3]),
+        .reg_write_y(wire_from_control_unit_reg_signal[1]),
+        .reg_write_accumulator(wire_from_control_unit_lda_signal),
+
+        .reg_read_x(wire_from_control_unit_reg_signal[2]),
+        .reg_read_y(wire_from_control_unit_reg_signal[0]),
+
+        .data_out(wire_from_general_p_reg_registers),
+        .data_out_accumulator(wire_from_general_p_reg_acc)
+    );
+
 
     FSM16bit FSM16bit_i(
         .clk(clk),.rst(rst),
         .start(wire_from_control_unit_start_alu_operation),
         .mov_enable(wire_from_control_unit_mov_enable),
         .op_code(wire_from_instr_mem[15:10]),
-        .a(wire_from_general_p_reg_acc),
+        .a({7'b0,wire_from_instr_mem[8:0]}),
         .b(wire_from_general_p_reg_registers),
         .bin(bin),
         .cin(cin),
@@ -210,47 +285,7 @@ module cpu_block(
         .zero_flag(wire_from_alu_flags[3])
     );
 
-    control_unit control_unit_i(
-        .clk(clk), .rst(rst),
-        .bgn(bgn), 
-        .fin_crypto(fin_crypto),
-        .fin_file(fin_file),
-        .opcode(wire_from_instr_mem[15:10]),
-        .flags(wire_from_alu_flags),
-        .Alu_busy(wire_from_alu_busy),
-        .register(wire_from_instr_mem[9]),
-
-        .reg_signal(wire_from_control_unit_reg_signal),
-        .STA_signal(wire_from_control_unit_sta_signal),
-        .LDA_signal(wire_from_control_unit_lda_signal),
-
-        .Load_data(wire_from_control_unit_load_data),
-        .Store_data(wire_from_control_unit_store_data),
-
-        .mem_read(wire_from_control_unit_mem_read),
-        .mem_write(wire_from_control_unit_mem_write),
-
-        .start_crypt(wire_from_control_unit_start_crypt),
-        .start_decrypt(wire_from_control_unit_start_decrypt),
-        .start_execute_crypto(wire_from_control_unit_start_execute_crypto),
-
-        .read_file(wire_from_control_unit_read_file),
-        .read_memory(wire_from_control_unit_read_memory),
-
-        .PUSH(wire_from_control_unit_push),
-        .POP(wire_from_control_unit_pop),
-
-        .pc_save_address_from_instr_mem(wire_from_control_unit_pc_save_address_from_instr_mem),
-        .pc_save_address_from_data_mem(wire_from_control_unit_pc_save_address_from_data_mem),
-        .pc_save_address_from_counter(wire_from_control_unit_pc_save_address_from_counter),
-
-        .Increm_PC(wire_from_control_unit_increm_pc),
-        .get_address_from_pc(wire_from_control_unit_get_address_from_pc),
-
-        .Start_ALU_operation(wire_from_control_unit_start_alu_operation),
-        .mov_enable(wire_from_control_unit_mov_enable)
-    );
-
+    
 
     crypto_block crypto_block_i(
         .clk(clk), .rst(rst),
@@ -277,10 +312,11 @@ module cpu_block_tb();
     wire fin_file_out;
     wire fin_cript;
     wire [15:0] key_outbus;
+    wire fin;
 
 
     wire c0, c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15;
-    wire c16, c17, c18, c19, c20, c21, c22, c23;
+    wire c16, c17, c18, c19, c20, c21, c22, c23, c24;
 
     cpu_block uut (
         .clk(clk),
@@ -291,15 +327,16 @@ module cpu_block_tb();
         .c5(c5), .c6(c6), .c7(c7), .c8(c8), .c9(c9),
         .c10(c10), .c11(c11), .c12(c12), .c13(c13), .c14(c14),
         .c15(c15), .c16(c16), .c17(c17), .c18(c18), .c19(c19),
-        .c20(c20), .c21(c21), .c22(c22), .c23(c23),
+        .c20(c20), .c21(c21), .c22(c22), .c23(c23), .c24(c24),
         .fin_file_out(fin_file_out),
         .fin_cript(fin_cript),
-        .key_outbus(key_outbus)
+        .key_outbus(key_outbus),
+        .fin(fin)
     );
 
     initial begin
         clk = 0;
-        forever #10 clk = ~clk; 
+        forever #50 clk = ~clk; 
     end
 
 
@@ -307,18 +344,21 @@ module cpu_block_tb();
 
         rst = 1;
         bgn = 0;
-        key_inbus = 16'h0000;
-
-        #20 rst = 0;
-
-
-        #30;
-        rst = 1; 
-        bgn = 1;
         key_inbus = 16'h1234; 
 
+        #100; 
+        rst = 0;
 
-        #3000;
+
+        #100;
+        rst = 1; 
+        bgn = 1;
+        
+        while (fin == 1'b0) begin
+            #100;
+        end
+
+        #200;
         $stop; 
     end
 

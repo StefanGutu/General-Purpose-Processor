@@ -45,7 +45,7 @@ void decimalToBinaryString(int num,int decimal_num, char *binary_str) {
 int main() {
     FILE *file;
 
-    if((file = fopen("assembly.txt", "r")) == NULL){
+    if((file = fopen("testcase/assembly.txt", "r")) == NULL){
         printf("Error to open assembly.txt to read!");
         exit(EXIT_FAILURE);
     }

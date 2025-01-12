@@ -9,11 +9,13 @@ module control_unit(
 	input [3:0] flags,				 					//carry,negative,overflow,zero
 	input Alu_busy,										//Signal that ALU is still busy
 	input register,										// Reg X or Y	
+	
 
 	//General porp reg
 	output reg [3:0]reg_signal,							//LD X, ST X, LD Y, ST Y
     output reg STA_signal,								//ST ACC
 	output reg LDA_signal,								//LD ACC
+	output reg signal_save_after_alu,					//Save acc from alu
 
 	//Crypto core reg
 	output reg Load_data,								//Load data for cript or decript
@@ -47,14 +49,18 @@ module control_unit(
 
 	//ALU
 	output reg Start_ALU_operation,	
-	output reg mov_enable
+	output reg mov_enable,
+
+	//End
+	output reg fin
 );
 
 	parameter IDLE = 					6'b000000; 
 	parameter READ_FILE = 				6'b000001;
 	parameter CHECK_END_READ_FILE =     6'b000010;
 	parameter GET_LINE_WITH_PC =        6'b000011;
-	parameter SEND_LINE_BACK =          6'b000100;
+	parameter INCREMENT_PC =          	6'b000100;
+	parameter SAVE_NEW_PC =				6'b100110;
 	parameter CHECK_TYPE_INSTR = 		6'b000101;
 
 	//For ALU
@@ -100,8 +106,8 @@ module control_unit(
 
 
 	//For END program
-	parameter STANDARD_INCR_PC =		6'b100110;
-	parameter END_EXECUTION =			6'b100111;			
+	parameter SAVE_ACC =				6'b100111;
+	parameter END_EXECUTION =			6'b101000;			
 
 
 	
@@ -134,10 +140,12 @@ module control_unit(
 				start_execute_crypto <= 1'b0;
 				get_address_from_pc <= 1'b0;
 				mov_enable <= 1'b0;
+				signal_save_after_alu <= 1'b0;
+				fin <= 1'b0;
 
 			end else begin
 				current_state <= next_state;
-				$monitor("Current_state = %b\n", current_state);
+				// $monitor("Current_state = %b\n", current_state);
 			end
 	end
 
@@ -168,9 +176,12 @@ module control_unit(
 				end
 			end
 			GET_LINE_WITH_PC : begin
-				next_state <= SEND_LINE_BACK;
+				next_state <= INCREMENT_PC;
 			end	
-			SEND_LINE_BACK : begin
+			INCREMENT_PC : begin
+				next_state <= SAVE_NEW_PC;
+			end
+			SAVE_NEW_PC : begin
 				next_state <= CHECK_TYPE_INSTR;
 			end
 			CHECK_TYPE_INSTR : begin
@@ -213,13 +224,13 @@ module control_unit(
 				next_state <= REG_ST_MEM_WRITE;
 			end
 			REG_ST_MEM_WRITE : begin
-				next_state <= STANDARD_INCR_PC;
+				next_state <= GET_LINE_WITH_PC;
 			end
 			REG_LD_MEM_READ : begin
 				next_state <= REG_LD;
 			end
 			REG_LD : begin
-				next_state <= STANDARD_INCR_PC;
+				next_state <= GET_LINE_WITH_PC;
 			end
 			//ACC
 			CHECK_ACC_ST_OR_LD : begin
@@ -234,13 +245,13 @@ module control_unit(
 				next_state <= ACC_ST_MEM_WRITE;
 			end
 			ACC_ST_MEM_WRITE : begin
-				next_state <= STANDARD_INCR_PC;
+				next_state <= GET_LINE_WITH_PC;
 			end
 			ACC_LD_MEM_READ : begin
 				next_state <= ACC_LD;
 			end
 			ACC_LD : begin
-				next_state <= STANDARD_INCR_PC;
+				next_state <= GET_LINE_WITH_PC;
 			end
 
 			//Part with Branch ----------------------------------------------------------------
@@ -287,7 +298,7 @@ module control_unit(
 					next_state <= JUMP_BRANCH;
 				end
 				else if(flags[3] == 1'b0) begin
-					next_state <= STANDARD_INCR_PC;
+					next_state <= GET_LINE_WITH_PC;
 				end
 			end
 			BRANCH_IF_NEG : begin
@@ -295,7 +306,7 @@ module control_unit(
 					next_state <= JUMP_BRANCH;
 				end
 				else if(flags[2] == 1'b0) begin
-					next_state <= STANDARD_INCR_PC;
+					next_state <= GET_LINE_WITH_PC;
 				end
 			end
 			BRANCH_IF_CARRY : begin
@@ -303,7 +314,7 @@ module control_unit(
 					next_state <= JUMP_BRANCH;
 				end
 				else if(flags[1] == 1'b0) begin
-					next_state <= STANDARD_INCR_PC;
+					next_state <= GET_LINE_WITH_PC ;
 				end
 			end
 			BRANCH_IF_OVERFLOW : begin
@@ -311,7 +322,7 @@ module control_unit(
 					next_state <= JUMP_BRANCH;
 				end
 				else if(flags[0] == 1'b0) begin
-					next_state <= STANDARD_INCR_PC;
+					next_state <= GET_LINE_WITH_PC;
 				end
 			end
 			BRANCH_ALWAYS : begin
@@ -344,7 +355,7 @@ module control_unit(
 				next_state <= CRYPTO_SAVE_KEY;
 			end
 			CRYPTO_SAVE_KEY : begin
-				next_state <= STANDARD_INCR_PC;
+				next_state <= GET_LINE_WITH_PC;
 			end
 
 			//Part with ALU -------------------------------------------------------------------
@@ -360,19 +371,18 @@ module control_unit(
 					next_state <= CHECK_BUSY_ALU;
 				end
 				else if (Alu_busy == 1'b0) begin
-					next_state <= STANDARD_INCR_PC;
+					next_state <= SAVE_ACC;
 				end
 			end
-
-			//Increment PC without branch ----------------------------------------------------
-			STANDARD_INCR_PC : begin
+			SAVE_ACC : begin
 				next_state <= GET_LINE_WITH_PC;
 			end
+
 
 			//Part with End ------------------------------------------------------------------
 
 			END_EXECUTION : begin
-				next_state <= IDLE;
+				// next_state <= IDLE;
 			end
 		endcase
 	end
@@ -402,17 +412,25 @@ module control_unit(
 		start_execute_crypto <= 1'b0;
 		get_address_from_pc <= 1'b0;
 		mov_enable <= 1'b0;
+		signal_save_after_alu <= 1'b0;
+		fin <= 1'b0;
 
 
 		case(next_state)
 			READ_FILE : begin
 				read_file <= 1'b1;
 			end
+			CHECK_END_READ_FILE : begin
+				read_file <= 1'b1;
+			end
 			GET_LINE_WITH_PC : begin
 				read_memory <= 1'b1;
+				get_address_from_pc <= 1'b1;
+			end
+			INCREMENT_PC : begin
 				Increm_PC <= 1'b1;
 			end
-			SEND_LINE_BACK : begin
+			SAVE_NEW_PC : begin
 				pc_save_address_from_counter <= 1'b1;
 			end
 			//ST REG ---------------------------------------------------------------------
@@ -489,6 +507,9 @@ module control_unit(
 					mov_enable <= 1'b1;
 				end
 			end
+			SAVE_ACC : begin
+				signal_save_after_alu <= 1'b1;
+			end
 			//Crypto ----------------------------------------------------------------
 			CRYPTO_MEM_READ : begin
 				mem_read <= 1'b1;
@@ -511,9 +532,9 @@ module control_unit(
 			CRYPTO_SAVE_KEY : begin
 				mem_write <= 1'b1;
 			end
-			STANDARD_INCR_PC : begin
-				// pc_save_address_from_counter <= 1'b1;
-				get_address_from_pc <= 1'b1;
+			//End
+			END_EXECUTION : begin
+				fin <= 1'b1;
 			end
 
 		endcase

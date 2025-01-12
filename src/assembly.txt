@@ -1,6 +1,2 @@
 ADD X #5
-SUB Y #2
-BRZ #5
-MOV X #6
-LDR X #20
 HLT
