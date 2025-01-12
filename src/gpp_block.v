@@ -82,6 +82,7 @@ module cpu_block(
     wire wire_from_control_unit_pc_save_address_from_instr_mem;             //c12
     wire wire_from_control_unit_pc_save_address_from_data_mem;              //c13
     wire wire_from_control_unit_pc_save_address_from_counter;               //c14
+    wire wire_from_control_unit_pc_send_new_address;                        //c25
     //PC Counter
     wire wire_from_control_unit_increm_pc;                                  //c3
     wire wire_from_control_unit_get_address_from_pc;                        //c2
@@ -130,9 +131,22 @@ module cpu_block(
     end
 
     always @(posedge clk) begin
-        if(c14) begin
-            $display("Address : %b", wire_from_pc_counter);
+        if(c1) begin
+            $display("Time: %0t  Instr mem : %b\n",$time, wire_from_instr_mem);
         end
+        if(c2) begin
+            $display("Time: %0t  PC : %b\n",$time, wire_from_pc);
+        end
+        if(c17) begin
+            $display("Time: %0t  data_a : %b   data_b : %b\n",$time, {7'b0,wire_from_instr_mem[8:0]}, wire_from_general_p_reg_registers);
+        end
+        if(c24) begin
+            $display("Time: %0t  ALU : %b\n",$time, wire_frm_alu_result_to_acc);
+        end
+        if(c8) begin
+            $display("Time: %0t  ACC_data_mem : %b\n",$time, wire_from_general_p_reg_acc);
+        end
+        if()
     end
 
     control_unit control_unit_i(
@@ -202,6 +216,7 @@ module cpu_block(
         .save_address_from_instr_mem(wire_from_control_unit_pc_save_address_from_instr_mem),
         .save_address_from_data_mem(wire_from_control_unit_pc_save_address_from_data_mem),
         .save_address_from_counter(wire_from_control_unit_pc_save_address_from_counter),
+        .increm_pc(wire_from_control_unit_increm_pc),
 
         .address_from_instr_mem(wire_from_instr_mem),
         .address_from_data_mem(wire_from_data_mem_for_pc),
@@ -353,6 +368,8 @@ module cpu_block_tb();
         #100;
         rst = 1; 
         bgn = 1;
+        #100;
+        bgn = 0;
         
         while (fin == 1'b0) begin
             #100;

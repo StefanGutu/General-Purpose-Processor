@@ -25,6 +25,8 @@ module general_purpose_registers (
             reg_x <= 16'b0; // Reset register X
             reg_y <= 16'b0; // Reset register Y
 			reg_accumulator <=16'b0;//Reset register accumulator
+            data_out <= 16'b0;
+            data_out_accumulator <= 16'b0;
         end else begin
             if (reg_write_x) reg_x <= data_in; // Write to register X
             if (reg_write_y) reg_y <= data_in; // Write to register Y

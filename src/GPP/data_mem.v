@@ -38,6 +38,7 @@ module data_mem #(parameter WIDTH=15)(
         end
         if (signal_acc_data_write == 1'b1) begin
             memory[address] <= acc_data;
+            // $display("Time: %0t  data_mem : %b\n",$time, acc_data);
         end
         if (signal_pc_data_write == 1'b1) begin
             memory[sp_address] <= pc_data;

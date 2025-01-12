@@ -60,7 +60,6 @@ module control_unit(
 	parameter CHECK_END_READ_FILE =     6'b000010;
 	parameter GET_LINE_WITH_PC =        6'b000011;
 	parameter INCREMENT_PC =          	6'b000100;
-	parameter SAVE_NEW_PC =				6'b100110;
 	parameter CHECK_TYPE_INSTR = 		6'b000101;
 
 	//For ALU
@@ -179,9 +178,6 @@ module control_unit(
 				next_state <= INCREMENT_PC;
 			end	
 			INCREMENT_PC : begin
-				next_state <= SAVE_NEW_PC;
-			end
-			SAVE_NEW_PC : begin
 				next_state <= CHECK_TYPE_INSTR;
 			end
 			CHECK_TYPE_INSTR : begin
@@ -418,20 +414,17 @@ module control_unit(
 
 		case(next_state)
 			READ_FILE : begin
-				read_file <= 1'b1;
+				// read_file <= 1'b1;
 			end
 			CHECK_END_READ_FILE : begin
 				read_file <= 1'b1;
 			end
 			GET_LINE_WITH_PC : begin
-				read_memory <= 1'b1;
 				get_address_from_pc <= 1'b1;
 			end
 			INCREMENT_PC : begin
 				Increm_PC <= 1'b1;
-			end
-			SAVE_NEW_PC : begin
-				pc_save_address_from_counter <= 1'b1;
+				read_memory <= 1'b1;
 			end
 			//ST REG ---------------------------------------------------------------------
 			REG_ST : begin

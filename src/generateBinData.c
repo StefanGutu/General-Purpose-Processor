@@ -52,7 +52,7 @@ int main() {
 
     FILE *out;
 
-    if((out = fopen("res_in_bin.txt","w")) == NULL){
+    if((out = fopen("GPP/res_in_bin.txt","w")) == NULL){
         printf("Error to open res_in_bin.txt to write!");
         exit(EXIT_FAILURE);
     }
@@ -94,7 +94,13 @@ int main() {
                 decimalToBinaryString(6, 1, val_for_instr);
             } else if (strcmp(instruction, mem_instr[1]) == 0) { //PT STR
                 decimalToBinaryString(6, 2, val_for_instr);
-            } else {
+            } else if (strcmp(instruction, mem_instr[2]) == 0) { //PT STA
+                decimalToBinaryString(6, 3, val_for_instr);
+            } else if (strcmp(instruction, mem_instr[3]) == 0) { //PT LDA
+                decimalToBinaryString(6, 4, val_for_instr);
+            } else if (strcmp(instruction, crypto) == 0) { //CRP
+                decimalToBinaryString(6, 30, val_for_instr);
+            }else {
                 for (int i = 0; i < 18; i++) { //Aici is alu instruction si le scrie codu
                     if (strcmp(alu_instr[i], instruction) == 0) {
                         decimalToBinaryString(6, i + 12, val_for_instr);

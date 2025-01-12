@@ -9,7 +9,7 @@ module ProgramCounter (
     input save_address_from_instr_mem,              //signal to save address from instr memory
     input save_address_from_data_mem,               //signal to save address from data memory
     input save_address_from_counter,                //signal to save address from PC counter
-
+    input increm_pc,
 
     output reg [15:0] pc_out
 );
@@ -21,13 +21,8 @@ module ProgramCounter (
             address_data <= 16'h0000; 
         end
         else begin
-            //For PC Counter
-            if (save_address_from_counter == 1'b1) begin
-                address_data <= address_from_counter_pc;
-            end
-
             //For Instr memory
-            else if (save_address_from_instr_mem == 1'b1) begin
+            if (save_address_from_instr_mem == 1'b1) begin
                 address_data <= address_from_instr_mem;
             end 
 
@@ -35,10 +30,12 @@ module ProgramCounter (
             else if (save_address_from_data_mem == 1'b1) begin
                 address_data <= address_from_data_mem;
             end
-            
-            else begin
-                pc_out <= address_data;
+
+            if(increm_pc == 1'b1) begin
+                address_data <= address_data + 1'b1;
             end
+            
+            pc_out <= address_data;
         end     
     end
 
