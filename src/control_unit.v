@@ -209,10 +209,10 @@ module control_unit(
 			end
 			//REG
 			CHECK_REG_ST_OR_LD : begin
-				if(opcode == 6'b000001) begin
+				if(opcode == 6'b000010) begin
 					next_state <= REG_ST;
 				end
-				else if (opcode == 6'b000010) begin
+				else if (opcode == 6'b000001) begin
 					next_state <= REG_LD_MEM_READ;
 				end
 			end

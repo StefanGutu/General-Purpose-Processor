@@ -36,24 +36,22 @@ module data_mem #(parameter WIDTH=15)(
             //write the input data to the memory at the specified address
             memory[address] <= write_data;
         end
-        if (signal_acc_data_write == 1'b1) begin
+        else if (signal_acc_data_write == 1'b1) begin
             memory[address] <= acc_data;
             // $display("Time: %0t  data_mem : %b\n",$time, acc_data);
         end
-        if (signal_pc_data_write == 1'b1) begin
+        else if (signal_pc_data_write == 1'b1) begin
             memory[sp_address] <= pc_data;
         end
-        if(signal_crypto_data_write == 1'b1) begin
+        else if(signal_crypto_data_write == 1'b1) begin
             memory[address] <= crypto_data;
         end
-    end
-
-
-    always @(*) begin
-        read_data <= memory[address];
-        acc_read_data <= memory[address];
-        pc_read_data <= memory[sp_address] + 1'b1;
-        crypto_read_data <= memory[address];
+        else begin
+            read_data <= memory[address];
+            acc_read_data <= memory[address];
+            pc_read_data <= memory[sp_address] + 1'b1;
+            crypto_read_data <= memory[address];
+        end
     end
 
 endmodule

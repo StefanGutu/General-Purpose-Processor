@@ -28,20 +28,27 @@ module general_purpose_registers (
             data_out <= 16'b0;
             data_out_accumulator <= 16'b0;
         end else begin
-            if (reg_write_x) reg_x <= data_in; // Write to register X
-            if (reg_write_y) reg_y <= data_in; // Write to register Y
+            if (reg_write_x) begin
+                reg_x <= data_in; // Write to register X
+                $display("Time: %0t  reg_x : %b\n",$time, data_in);
+            end
+            
+            if (reg_write_y) begin
+                reg_y <= data_in; // Write to register Y
+            end
 			if (reg_write_accumulator) reg_accumulator <= data_in_acc_mem; // Write to register accumulator
             if (signal_save_after_alu) reg_accumulator <= data_in_acc_alu;
+    
         end
     end
 
     // Read operations
     always @(*) begin
-        if (reg_read_x) data_out= reg_x; // Read from register X
-        else 
-		begin		
+        if (reg_read_x) begin
+            data_out= reg_x; // Read from register X
+        end
+        else begin		
 			if (reg_read_y) data_out= reg_y; // Read from register Y
-			else data_out = 16'b0;           // Default output
 		end
 		data_out_accumulator = reg_accumulator; // Read from register accumulator
 

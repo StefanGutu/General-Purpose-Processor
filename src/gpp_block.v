@@ -94,7 +94,11 @@ module cpu_block(
 
     always @(posedge clk) begin
             //General p reg
-            {c4,c5,c6,c7} <= wire_from_control_unit_reg_signal;                             //c4,c5,c6,c7
+            // {c4,c5,c6,c7} <= wire_from_control_unit_reg_signal;                             //c4,c5,c6,c7
+            c4 <= wire_from_control_unit_reg_signal[3];                                     //c4
+            c5 <= wire_from_control_unit_reg_signal[2];                                     //c5
+            c6 <= wire_from_control_unit_reg_signal[1];                                     //c6
+            c7 <= wire_from_control_unit_reg_signal[0];                                     //c7
             c10 <= wire_from_control_unit_sda_signal;                                       //c10
             c11 <= wire_from_control_unit_lda_signal;                                       //c11
             c24 <= wire_from_control_unit_acc_save_after_alu;                               //c24
@@ -146,7 +150,12 @@ module cpu_block(
         if(c8) begin
             $display("Time: %0t  ACC_data_mem : %b\n",$time, wire_from_general_p_reg_acc);
         end
-        if()
+        if(c5) begin
+            $display("Time: %0t  val_for_next_reg : %b\n",$time, wire_from_data_mem_for_reg_x_y);
+        end
+        if(c4) begin
+            $display("Time: %0t  from_register : %b\n",$time, wire_from_general_p_reg_registers);
+        end
     end
 
     control_unit control_unit_i(
@@ -218,7 +227,7 @@ module cpu_block(
         .save_address_from_counter(wire_from_control_unit_pc_save_address_from_counter),
         .increm_pc(wire_from_control_unit_increm_pc),
 
-        .address_from_instr_mem(wire_from_instr_mem),
+        .address_from_instr_mem({7'b0,wire_from_instr_mem[8:0]}),
         .address_from_data_mem(wire_from_data_mem_for_pc),
         .address_from_counter_pc(wire_from_pc_counter),
 
@@ -268,12 +277,12 @@ module cpu_block(
         .data_in_acc_mem(wire_from_data_mem_for_reg_acc),
 
         .signal_save_after_alu(wire_from_control_unit_acc_save_after_alu),
-        .reg_write_x(wire_from_control_unit_reg_signal[3]),
-        .reg_write_y(wire_from_control_unit_reg_signal[1]),
+        .reg_write_x(wire_from_control_unit_reg_signal[2]),
+        .reg_write_y(wire_from_control_unit_reg_signal[0]),
         .reg_write_accumulator(wire_from_control_unit_lda_signal),
 
-        .reg_read_x(wire_from_control_unit_reg_signal[2]),
-        .reg_read_y(wire_from_control_unit_reg_signal[0]),
+        .reg_read_x(wire_from_control_unit_reg_signal[3]),
+        .reg_read_y(wire_from_control_unit_reg_signal[1]),
 
         .data_out(wire_from_general_p_reg_registers),
         .data_out_accumulator(wire_from_general_p_reg_acc)
