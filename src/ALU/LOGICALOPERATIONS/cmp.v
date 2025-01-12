@@ -1,4 +1,3 @@
-`timescale 1ns / 1ps
 module CMP16bit(
     input wire [15:0] op1,       
     input wire [15:0] op2,       

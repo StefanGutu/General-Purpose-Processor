@@ -1,4 +1,3 @@
-`timescale 1ns / 1ps
 module RSL16bit(
     input wire [15:0] inp,         
     input wire [15:0] shift_value,  

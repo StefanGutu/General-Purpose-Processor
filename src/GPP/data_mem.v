@@ -1,10 +1,30 @@
 module data_mem #(parameter WIDTH=15)(
     input clk,               // Clock signal
+
+    //Address from Instr mem
     input [8:0] address,     // 9 bit address for accessing up to 400 locations
+
+    //Reg X, Y
     input [WIDTH:0] write_data, // 16 bit data to write to memory
     input mem_write,         // control signal for memory write operation
-    input mem_read,          // control signal for memory read operation
-    output reg [WIDTH:0] read_data   // 16 bit data output for read operations
+    output reg [WIDTH:0] read_data,
+
+    //ACC
+    input signal_acc_data_write,  
+    input [15:0] acc_data,
+    output reg [15:0] acc_read_data,
+
+    //PC and SP
+    input signal_pc_data_write,
+    input [8:0] sp_address,
+    input [15:0] pc_data,
+    output reg [15:0] pc_read_data,
+
+    //Crypto
+    input signal_crypto_data_write,
+    input [15:0]  crypto_data,
+    output reg [15:0] crypto_read_data
+
 );
 
     // declare memory: 400 locations, each 16 bits wide
@@ -16,17 +36,23 @@ module data_mem #(parameter WIDTH=15)(
             //write the input data to the memory at the specified address
             memory[address] <= write_data;
         end
+        if (signal_acc_data_write == 1'b1) begin
+            memory[address] <= acc_data;
+        end
+        if (signal_pc_data_write == 1'b1) begin
+            memory[sp_address] <= pc_data;
+        end
+        if(signal_crypto_data_write == 1'b1) begin
+            memory[address] <= crypto_data;
+        end
     end
 
-    // Handle read operations asynchronously
+
     always @(*) begin
-        if (mem_read) begin
-            // Output the data stored at the specified address
-            read_data = memory[address];
-        end else begin
-            // Output 0 if read is not enabled
-            read_data = 16'b0;
-        end
+        read_data <= memory[address];
+        acc_read_data <= memory[address];
+        pc_read_data <= memory[sp_address] + 1'b1;
+        crypto_read_data <= memory[address];
     end
 
 endmodule

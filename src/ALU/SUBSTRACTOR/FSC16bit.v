@@ -1,5 +1,4 @@
-`include "SUBSTRACTOR/FSC4bit.v"
-`timescale 1ns / 1ps
+`include "../ALU/SUBSTRACTOR/FSC4bit.v"
 module FullSubtractor16bit(a, b, bin, diff, bout, clk, rst);
     input [15:0] a, b;     
     input wire clk;

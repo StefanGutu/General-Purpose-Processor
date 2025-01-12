@@ -1,5 +1,4 @@
-`include "ADDER/CLA4bit.v"
-`timescale 1ns / 1ps
+`include "../ALU/ADDER/CLA4bit.v"
 module CLA16bit(a, b, cin, sum, cout, clk, rst);
     input [15:0] a, b;
     input wire clk;

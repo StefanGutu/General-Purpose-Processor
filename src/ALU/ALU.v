@@ -1,21 +1,21 @@
-`include "MULTIPLIER/multiplier.v"
-`include "SHIFTER/LSL.v"
-`include "SHIFTER/LSR.v"
-`include "SHIFTER/RSL.v"
-`include "SHIFTER/RSR.v"
-`include "SUBSTRACTOR/FSC16bit.v"
-`include "LOGICALOPERATIONS/and.v"
-`include "LOGICALOPERATIONS/cmp.v"
-`include "LOGICALOPERATIONS/not.v"
-`include "LOGICALOPERATIONS/or.v"
-`include "LOGICALOPERATIONS/tst.v"
-`include "LOGICALOPERATIONS/xor.v"
-`include "LOGICALOPERATIONS/mov.v"
-`include "DIVIDER/divider.v"
-`include "ARITHMETICOPERATIONS/dec.v"
-`include "ARITHMETICOPERATIONS/inc.v"
-`include "ARITHMETICOPERATIONS/mod.v"
-`include "ADDER/CLA16bit.v"
+`include "../ALU/MULTIPLIER/multiplier.v"
+`include "../ALU/SHIFTER/LSL.v"
+`include "../ALU/SHIFTER/LSR.v"
+`include "../ALU/SHIFTER/RSL.v"
+`include "../ALU/SHIFTER/RSR.v"
+`include "../ALU/SUBSTRACTOR/FSC16bit.v"
+`include "../ALU/LOGICALOPERATIONS/and.v"
+`include "../ALU/LOGICALOPERATIONS/cmp.v"
+`include "../ALU/LOGICALOPERATIONS/not.v"
+`include "../ALU/LOGICALOPERATIONS/or.v"
+`include "../ALU/LOGICALOPERATIONS/tst.v"
+`include "../ALU/LOGICALOPERATIONS/xor.v"
+`include "../ALU/LOGICALOPERATIONS/mov.v"
+`include "../ALU/DIVIDER/divider.v"
+`include "../ALU/ARITHMETICOPERATIONS/dec.v"
+`include "../ALU/ARITHMETICOPERATIONS/inc.v"
+`include "../ALU/ARITHMETICOPERATIONS/mod.v"
+`include "../ALU/ADDER/CLA16bit.v"
 
 module FSM16bit(
     input wire clk,
@@ -300,8 +300,6 @@ module FSM16bit(
     end
 endmodule
 
-
-`timescale 1ns / 1ps
 
 module tb_FSM16bit;
 

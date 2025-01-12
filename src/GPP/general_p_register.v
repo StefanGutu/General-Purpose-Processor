@@ -44,7 +44,7 @@ module general_purpose_registers (
 
 endmodule
 
-`timescale 1ns/1ps
+
 
 module general_purpose_registers_tb;
 

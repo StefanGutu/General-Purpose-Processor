@@ -20,7 +20,7 @@ const char* crypto = {"CRP"};
 const char* end = {"HLT"};
 
 //For reg X and Y
-const char reg[2][1] = {"X", "Y"};
+const char *reg = {"X"};
 
 //Function to convert from decimal to binary
 void decimalToBinaryString(int num,int decimal_num, char *binary_str) {
@@ -81,7 +81,12 @@ int main() {
             branch_or_no = 1;
             decimalToBinaryString(9, value, val_for_imd);
             
-            val_for_reg[0] = (strcmp(registerName, reg[0]) == 0) ? '0' : '1';
+            if (strcmp(registerName, reg) == 0) {
+                val_for_reg[0] = '0'; 
+            }else {
+                val_for_reg[0] = '1';
+            }
+
             val_for_reg[1] = '\0';
 
             

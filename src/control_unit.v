@@ -43,9 +43,11 @@ module control_unit(
 
 	//PC Counter
 	output reg Increm_PC,								//Increment counter PC 
+	output reg get_address_from_pc,
 
 	//ALU
-	output reg Start_ALU_operation	
+	output reg Start_ALU_operation,	
+	output reg mov_enable
 );
 
 	parameter IDLE = 					6'b000000; 
@@ -130,6 +132,8 @@ module control_unit(
 				pc_save_address_from_data_mem <= 1'b0;
 				pc_save_address_from_instr_mem <= 1'b0;
 				start_execute_crypto <= 1'b0;
+				get_address_from_pc <= 1'b0;
+				mov_enable <= 1'b0;
 
 			end else begin
 				current_state <= next_state;
@@ -396,6 +400,8 @@ module control_unit(
 		pc_save_address_from_data_mem <= 1'b0;
 		pc_save_address_from_instr_mem <= 1'b0;
 		start_execute_crypto <= 1'b0;
+		get_address_from_pc <= 1'b0;
+		mov_enable <= 1'b0;
 
 
 		case(next_state)
@@ -454,7 +460,7 @@ module control_unit(
 			//JMP stack
 			PUSH_SP : begin
 				PUSH <= 1'b1;
-				mem_write <= 1'b1;
+				// mem_write <= 1'b1;
 			end
 			PC_JUMP_AFTER_PUSH : begin
 				//Momentan nu e nevoie de nimic
@@ -478,6 +484,10 @@ module control_unit(
 			end
 			START_ALU : begin
 				Start_ALU_operation <= 1'b1;
+
+				if(opcode == 6'b010010) begin
+					mov_enable <= 1'b1;
+				end
 			end
 			//Crypto ----------------------------------------------------------------
 			CRYPTO_MEM_READ : begin
@@ -503,6 +513,7 @@ module control_unit(
 			end
 			STANDARD_INCR_PC : begin
 				// pc_save_address_from_counter <= 1'b1;
+				get_address_from_pc <= 1'b1;
 			end
 
 		endcase
@@ -514,7 +525,7 @@ endmodule
 
 //Testbench
 
-module ControlUnit_tb();
+module ControlUnit_tb_ii();
 
     reg clk;
     reg rst;

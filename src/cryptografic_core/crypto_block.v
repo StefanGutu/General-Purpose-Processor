@@ -1,11 +1,11 @@
-`include "counterCrypto.v"
-`include "crypto_ControlUnit.v"
-`include "inv_mix_columns.v"
-`include "key_data.v"
-`include "mix_columns.v"
-`include "reg_data.v"
-`include "S_Box.v"
-`include "shift_rows.v"
+`include "../cryptografic_core/counterCrypto.v"
+`include "../cryptografic_core/crypto_ControlUnit.v"
+`include "../cryptografic_core/inv_mix_columns.v"
+`include "../cryptografic_core/key_data.v"
+`include "../cryptografic_core/mix_columns.v"
+`include "../cryptografic_core/reg_data.v"
+`include "../cryptografic_core/S_Box.v"
+`include "../cryptografic_core/shift_rows.v"
 
 module crypto_block(
     input clk,
@@ -14,8 +14,9 @@ module crypto_block(
     input [15:0] data_inbus,
     input [1:0] cript_or_decript_signal,
     input bgn,
-    output reg c00,c01,c02,c03,c04,c05,c06,c07,c08,c09,c010,c011,c012,c013,c014,c015,c016,c017,c018,c019,c020,c021,
-    output reg [2:0] counter,
+    // output reg c00,c01,c02,c03,c04,c05,c06,c07,c08,c09,c010,c011,c012,c013,c014,c015,c016,c017,c018,c019,c020,c021,
+    // output reg [2:0] counter,
+    output reg fin,
     output reg [15:0] key_outbus,
     output reg [15:0] data_outbus
 );
@@ -70,8 +71,9 @@ module crypto_block(
     wire c0,c1,c2,c3,c4,c5,c6,c7,c8,c9,c10,c11,c12,c13,c14,c15,c16,c17,c18,c19,c20,c21;
 
     always @(posedge clk) begin
-        {c00,c01,c02,c03,c04,c05,c06,c07,c08,c09,c010,c011,c012,c013,c014,c015,c016,c017,c018,c019,c020,c021} <= {c0,c1,c2,c3,c4,c5,c6,c7,c8,c9,c10,c11,c12,c13,c14,c15,c16,c17,c18,c19,c20,c21};
-        counter <= wire_from_counter;
+    //     {c00,c01,c02,c03,c04,c05,c06,c07,c08,c09,c010,c011,c012,c013,c014,c015,c016,c017,c018,c019,c020,c021} <= {c0,c1,c2,c3,c4,c5,c6,c7,c8,c9,c10,c11,c12,c13,c14,c15,c16,c17,c18,c19,c20,c21};
+    //     counter <= wire_from_counter;
+            fin = c21;
     end
 
     //Control Unit ----------------------------------------------------------------

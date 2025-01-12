@@ -1,4 +1,3 @@
-`timescale 1ns / 1ps
 module MOV16bit(
     input wire [15:0] src,     
     input wire clk,             

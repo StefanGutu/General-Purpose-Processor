@@ -48,12 +48,11 @@ endmodule
 module pc_counter(
     input clk,
     input rst,
-    input get_address
+    input get_address,
     input increment_address,
-    input send_address
     input [15:0] address_from_pc,
     output reg [15:0] address_to_pc
-)
+);
 
     reg [15:0] temp_address;
 
@@ -68,7 +67,7 @@ module pc_counter(
             else if (increment_address == 1'b1) begin
                 temp_address <= temp_address + 1'b1;
             end
-            else if (send_address == 1'b1) begin
+            else begin
                 address_to_pc <= temp_address;
             end
         end
@@ -90,10 +89,12 @@ module StackPointer (
         if (!reset)
             sp_reg <= 16'h018F; 
         else begin
-            else if (push)
+            if (push == 1'b1) begin
                 sp_reg <= sp_reg - 16'b0001 ; 
-            else if (pop)
+            end
+            else if (pop == 1'b1) begin
                 sp_reg <= sp_reg + 16'b0001 ; 
+            end
             else begin
                 sp_out <= sp_reg;
             end
