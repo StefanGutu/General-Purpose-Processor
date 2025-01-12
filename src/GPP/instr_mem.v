@@ -16,7 +16,7 @@ module instr_mem(
     integer scan_file;
 
     initial begin
-        data_file = $fopen("res_in_bin.txt", "r");
+        data_file = $fopen("../GPP/res_in_bin.txt", "r");
         if (data_file == `NULL) begin
             $display("data_file handle was NULL");
             $finish;
@@ -24,24 +24,29 @@ module instr_mem(
     end
 
     always @(posedge clk, negedge rst) begin
-        if(rst ==1'b1) begin
+        if(!rst) begin
             counter_elem = 0;
             line_from_file = 0;
             fin_file = 0;
         end
         else begin
+            
             if(read_file == 1'b1) begin
                 scan_file = $fscanf(data_file, "%b\n", line_from_file); 
                 if ($feof(data_file)) begin //Will activate the semnal to stop reading from the file
                     fin_file = 1'b1;
+                    
                 end 
                 instruction_data[counter_elem] = line_from_file[15:0]; //saves the line in memory
                 counter_elem = counter_elem + 1; //increment the position where to save
+                
             end
             else if(read_memory == 1'b1) begin //signal to read from the memory
                 return_instr_line[15:0] = instruction_data[pos];    //with pos you specify where to read from instruction memory
                                                                     //will help us with branch
             end
+            
+           
         end   
         // $monitor(line_from_file);
     end

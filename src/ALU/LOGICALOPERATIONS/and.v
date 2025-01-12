@@ -1,4 +1,3 @@
-`timescale 1ns / 1ps
 module AND16bit(
     input wire [15:0] inp1, 
     input wire [15:0] inp2, 

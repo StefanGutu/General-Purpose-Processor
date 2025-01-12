@@ -2,12 +2,14 @@ module general_purpose_registers (
     input clk,                // Clock signal
     input rst,                // Reset signal (active low)
     input [15:0] data_in,     // Data input
+    input [15:0] data_in_acc_alu,
+    input [15:0] data_in_acc_mem,
+    input signal_save_after_alu,
     input reg_write_x,        // Control signal to write to register X
     input reg_write_y,        // Control signal to write to register Y
 	input reg_write_accumulator,// Control signal to write to register accumulator
     input reg_read_x,         // Control signal to read from register X
     input reg_read_y,         // Control signal to read from register Y
-	input reg_read_accumulator,// Control signal to read from register accumulator
     output reg [15:0] data_out, // Data output from register X sau Y
     //output reg [15:0] data_out, // Data output from register Y
 	output reg [15:0] data_out_accumulator // Data output from register accumulator
@@ -23,28 +25,38 @@ module general_purpose_registers (
             reg_x <= 16'b0; // Reset register X
             reg_y <= 16'b0; // Reset register Y
 			reg_accumulator <=16'b0;//Reset register accumulator
+            data_out <= 16'b0;
+            data_out_accumulator <= 16'b0;
         end else begin
-            if (reg_write_x) reg_x <= data_in; // Write to register X
-            if (reg_write_y) reg_y <= data_in; // Write to register Y
-			if (reg_write_accumulator) reg_accumulator <= data_in; // Write to register accumulator
+            if (reg_write_x) begin
+                reg_x <= data_in; // Write to register X
+                $display("Time: %0t  reg_x : %b\n",$time, data_in);
+            end
+            
+            if (reg_write_y) begin
+                reg_y <= data_in; // Write to register Y
+            end
+			if (reg_write_accumulator) reg_accumulator <= data_in_acc_mem; // Write to register accumulator
+            if (signal_save_after_alu) reg_accumulator <= data_in_acc_alu;
+    
         end
     end
 
     // Read operations
     always @(*) begin
-        if (reg_read_x) data_out= reg_x; // Read from register X
-        else 
-		begin		
+        if (reg_read_x) begin
+            data_out= reg_x; // Read from register X
+        end
+        else begin		
 			if (reg_read_y) data_out= reg_y; // Read from register Y
-			else data_out = 16'b0;           // Default output
 		end
-		if (reg_read_accumulator) data_out_accumulator = reg_accumulator; // Read from register accumulator
-        else data_out_accumulator = 16'b0;           // Default output
+		data_out_accumulator = reg_accumulator; // Read from register accumulator
+
     end
 
 endmodule
 
-`timescale 1ns/1ps
+
 
 module general_purpose_registers_tb;
 

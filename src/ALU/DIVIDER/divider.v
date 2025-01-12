@@ -1,4 +1,3 @@
-`timescale 1ns / 1ps
 module divider(
     input [15:0] dividend,
     input [15:0] divisor,

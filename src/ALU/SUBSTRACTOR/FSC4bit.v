@@ -1,4 +1,4 @@
-`include "SUBSTRACTOR/FSC1bit.v"
+`include "../ALU/SUBSTRACTOR/FSC1bit.v"
 
 module FSC4bit(a, b, bin, diff, bout);
     input [3:0] a, b;    

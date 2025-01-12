@@ -1,4 +1,3 @@
-`timescale 1ns / 1ps
 module INC16bit(
     input wire [15:0] inp, 
     input wire clk,          

@@ -1,21 +1,21 @@
-`include "MULTIPLIER/multiplier.v"
-`include "SHIFTER/LSL.v"
-`include "SHIFTER/LSR.v"
-`include "SHIFTER/RSL.v"
-`include "SHIFTER/RSR.v"
-`include "SUBSTRACTOR/FSC16bit.v"
-`include "LOGICALOPERATIONS/and.v"
-`include "LOGICALOPERATIONS/cmp.v"
-`include "LOGICALOPERATIONS/not.v"
-`include "LOGICALOPERATIONS/or.v"
-`include "LOGICALOPERATIONS/tst.v"
-`include "LOGICALOPERATIONS/xor.v"
-`include "LOGICALOPERATIONS/mov.v"
-`include "DIVIDER/divider.v"
-`include "ARITHMETICOPERATIONS/dec.v"
-`include "ARITHMETICOPERATIONS/inc.v"
-`include "ARITHMETICOPERATIONS/mod.v"
-`include "ADDER/CLA16bit.v"
+`include "../ALU/MULTIPLIER/multiplier.v"
+`include "../ALU/SHIFTER/LSL.v"
+`include "../ALU/SHIFTER/LSR.v"
+`include "../ALU/SHIFTER/RSL.v"
+`include "../ALU/SHIFTER/RSR.v"
+`include "../ALU/SUBSTRACTOR/FSC16bit.v"
+`include "../ALU/LOGICALOPERATIONS/and.v"
+`include "../ALU/LOGICALOPERATIONS/cmp.v"
+`include "../ALU/LOGICALOPERATIONS/not.v"
+`include "../ALU/LOGICALOPERATIONS/or.v"
+`include "../ALU/LOGICALOPERATIONS/tst.v"
+`include "../ALU/LOGICALOPERATIONS/xor.v"
+`include "../ALU/LOGICALOPERATIONS/mov.v"
+`include "../ALU/DIVIDER/divider.v"
+`include "../ALU/ARITHMETICOPERATIONS/dec.v"
+`include "../ALU/ARITHMETICOPERATIONS/inc.v"
+`include "../ALU/ARITHMETICOPERATIONS/mod.v"
+`include "../ALU/ADDER/CLA16bit.v"
 
 module FSM16bit(
     input wire clk,
@@ -39,24 +39,24 @@ module FSM16bit(
 );
 
     localparam IDLE = 6'b000000;  // IDLE
-    localparam ADD  = 6'b000001;  // ADD
-    localparam SUB  = 6'b000010;  // SUB
-    localparam INC  = 6'b000011;  // INC
-    localparam DEC  = 6'b000100;  // DEC
-    localparam MOD  = 6'b000101;  // MOD
-    localparam AND  = 6'b000110;  // AND
-    localparam CMP  = 6'b000111;  // CMP
-    localparam MOV  = 6'b001000;  // MOV
-    localparam NOT  = 6'b001001;  // NOT
-    localparam OR   = 6'b001010;  // OR
-    localparam XOR  = 6'b001011;  // XOR
-    localparam MUL  = 6'b001100;  // MUL
-    localparam LSL  = 6'b001101;  // LSL
+    localparam ADD  = 6'b001100;  // ADD
+    localparam SUB  = 6'b001101;  // SUB
     localparam LSR  = 6'b001110;  // LSR
-    localparam RSL  = 6'b001111;  // RSL
+    localparam LSL  = 6'b001111;  // LSL
     localparam RSR  = 6'b010000;  // RSR
-    localparam DIV  = 6'b010001;  //DIV
-    localparam TST  = 6'b010010; //TST
+    localparam RSL  = 6'b010001;  // RSL
+    localparam MOV  = 6'b010010;  // MOV
+    localparam MUL  = 6'b010011;  // MUL
+    localparam DIV  = 6'b010100;  // DIV
+    localparam MOD  = 6'b010101;  // MOD
+    localparam AND  = 6'b010110;  // AND
+    localparam OR   = 6'b010111;  // OR
+    localparam XOR  = 6'b011000;  // XOR
+    localparam NOT  = 6'b011001;  // NOT
+    localparam CMP  = 6'b011010;  // CMP
+    localparam TST  = 6'b011011;  // TST
+    localparam INC  = 6'b011100;  // INC
+    localparam DEC  = 6'b011101;  // DEC
 
     reg [5:0] current_state, next_state;
     reg start_mul;
@@ -235,6 +235,7 @@ module FSM16bit(
             IDLE: begin
                 busy = 0;
                 if (start) begin
+                    // $display("start = %b || op_code = %b",start, op_code);
                     case (op_code)
                         ADD: next_state = ADD;
                         SUB: next_state = SUB;
@@ -276,7 +277,7 @@ module FSM16bit(
             zero_flag <= 1'b0;
         end else begin
             case (current_state)
-                ADD: begin result <= add_result; cout <= add_cout; overflow_flag <= (add_result != {add_cout, add_result}); negative_flag <= add_result[15]; carry_flag <= add_cout; zero_flag <= (add_result == 16'b0); end
+                ADD: begin result <= a+b; cout <= add_cout; overflow_flag <= (add_result != {add_cout, add_result}); negative_flag <= add_result[15]; carry_flag <= add_cout; zero_flag <= (add_result == 16'b0); end
                 SUB: begin result <= sub_result; bout <= sub_bout; overflow_flag <= (sub_result != {sub_bout, sub_result}); negative_flag <= sub_result[15]; carry_flag <= sub_bout; zero_flag <= (sub_result == 16'b0); end
                 INC: begin result <= inc_result; overflow_flag <= (a == 16'b1111111111111111); negative_flag <= inc_result[15]; carry_flag <= (a == 16'b1111111111111111); zero_flag <= (inc_result == 16'b0); end
                 DEC: begin result <= dec_result; overflow_flag <= (a == 16'd0); negative_flag <= dec_result[15]; carry_flag <= (a == 16'd0); zero_flag <= (dec_result == 16'b0); end
@@ -296,12 +297,12 @@ module FSM16bit(
                 TST: begin result <= tst_result; overflow_flag <= ovf_flag; negative_flag <= neg_flag; carry_flag <= carr_flag; zero_flag <= ze_flag; end
                 default: begin result <= result; overflow_flag <= overflow_flag; negative_flag <= negative_flag; carry_flag <= carry_flag; zero_flag <= zero_flag; end
             endcase
-        end
+
+            // $display("a:%b |  b:%b |  result:%b",a, b, result);
+        end 
     end
 endmodule
 
-
-`timescale 1ns / 1ps
 
 module tb_FSM16bit;
 

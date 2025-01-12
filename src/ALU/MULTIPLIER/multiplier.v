@@ -1,4 +1,3 @@
-`timescale 1ns / 1ps
 module multiplier(
     input [15:0] a,
     input [15:0] b,
