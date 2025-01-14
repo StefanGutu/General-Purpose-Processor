@@ -113,19 +113,19 @@ module crypto_block(
     );
 
     always @(posedge clk) begin
-        if(c8 == 1'b1) begin
-            $monitor("At time %0t:c8 key_cript = %h", $time, wire_from_sbox_key_cript);
-        end
-        if (c15) begin
-            $monitor("At time %0t: key_decript = %h", $time, wire_from_sbox_key_decript);
-        end
-        if(cript_or_decript_signal == 2'b01 &&c21 == 1'b1) begin
+        // if(c8 == 1'b1) begin
+        //     $monitor("At time %0t:c8 key_cript = %h", $time, wire_from_sbox_key_cript);
+        // end
+        // if (c15) begin
+        //     $monitor("At time %0t: key_decript = %h", $time, wire_from_sbox_key_decript);
+        // end
+        if(cript_or_decript_signal == 2'b01 && c21 == 1'b1) begin
             key_outbus <= wire_key_outbus_cript;
-            $monitor("At time %0t: wire_key_outbus_cript = %h", $time, wire_key_outbus_cript);
+            $display("At time %0t: wire_key_outbus_cript = %h\n", $time, wire_key_outbus_cript);
         end
         if(cript_or_decript_signal == 2'b10 && c21 == 1'b1) begin
             key_outbus <= wire_key_outbus_decript;
-            $monitor("At time %0t: wire_key_outbus_decript = %h", $time, wire_to_get_out_sbox);
+            $display("At time %0t: wire_key_outbus_decript = %h\n", $time, wire_to_get_out_sbox);
         end
     end
 
@@ -137,20 +137,28 @@ module crypto_block(
         //Cript
         if(c1 == 1'b1) begin   
             reg_to_reg_data_cript <= data_inbus ^ key_inbus;
+            // reg_to_reg_data_cript <= data_inbus;
         end
-        if(c8 == 1'b1) begin
+        if(c8 == 1'b1 && wire_from_counter == 3'b100) begin
+            reg_to_reg_data_cript <= wire_from_shift_cript ^ wire_from_sbox_key_cript;
+            // reg_to_reg_data_cript <= wire_from_shift_cript;
+        end
+        if(c8 == 1'b1 && wire_from_counter < 3'b100) begin
             reg_to_reg_data_cript <= wire_from_mixcol_cript ^ wire_from_sbox_key_cript;
+            // reg_to_reg_data_cript <= wire_from_mixcol_cript;
         end
         //Decript
         if(c9 == 1'b1) begin
             wire_to_shift_xor_or_reg <= data_inbus ^ key_inbus;
-            
-        end
+            // wire_to_shift_xor_or_reg <= data_inbus;
+        end 
         if(c15 == 1'b1) begin
             xor_decript <= wire_from_sbox_key_decript ^ wire_from_sbox_data_decript;
+            // xor_decript <= wire_from_sbox_data_decript;
         end 
         if(c18 == 1'b1) begin
             xor_decript_outbus <= wire_to_get_out_sbox ^ wire_from_sbox_data_decript;
+            // xor_decript_outbus <= wire_from_sbox_data_decript;
         end
         if(c10 == 1'b1) begin
             wire_to_shift_xor_or_reg <= wire_from_mixcol_decript;
@@ -163,56 +171,56 @@ module crypto_block(
     always @(posedge clk) begin
         if(cript_or_decript_signal == 2'b10 && c20 == 1'b1) begin
             data_outbus <= xor_decript_outbus;
-            $monitor("At time %0t: wire_data_outbus_decript = %h", $time, xor_decript_outbus);
+            $display("At time %0t: wire_data_outbus_decript = %h", $time, xor_decript_outbus);
 
         end
         if(cript_or_decript_signal == 2'b01 && c20 == 1'b1) begin
             data_outbus <= reg_to_reg_data_cript;
-            $monitor("At time %0t: wire_data_outbus_cript = %h", $time, wire_data_outbus);
+            $display("At time %0t: wire_data_outbus_cript = %h", $time, reg_to_reg_data_cript);
         end
     end
 
 
-    always @(posedge clk) begin
-        //Cript
-        if (c0) begin
-            $display("At time %0t: data_in = %h | key_in = %h",$time,data_inbus, key_inbus);
-        end
-        if (c2) begin
-            $display("At time %0t: reg_to_reg_data_cript = %h",$time,reg_to_reg_data_cript);
-        end
-        if (c3) begin
-            $display("At time %0t: reg_data = %h",$time,wire_from_reg_data_cript);
-        end
-        if (c4) begin
-            $display("At time %0t: subbox = %h",$time,wire_from_sbox_data_cript);
-        end
-        if (c7) begin
-            $display("At time %0t: shift = %h",$time,wire_from_shift_cript);
-            $display("At time %0t: mixcol = %h",$time,wire_from_mixcol_cript);
-        end
+    // always @(posedge clk) begin
+    //     //Cript
+    //     if (c0) begin
+    //         $display("At time %0t: data_in = %h | key_in = %h",$time,data_inbus, key_inbus);
+    //     end
+    //     if (c2) begin
+    //         $display("At time %0t: reg_to_reg_data_cript = %h",$time,reg_to_reg_data_cript);
+    //     end
+    //     if (c3) begin
+    //         $display("At time %0t: reg_data = %h",$time,wire_from_reg_data_cript);
+    //     end
+    //     if (c4) begin
+    //         $display("At time %0t: subbox = %h",$time,wire_from_sbox_data_cript);
+    //     end
+    //     if (c7) begin
+    //         $display("At time %0t: shift = %h",$time,wire_from_shift_cript);
+    //         $display("At time %0t: mixcol = %h",$time,wire_from_mixcol_cript);
+    //     end
 
 
-        //Decript
-        if (c11) begin
-            $display("At time %0t: xor_sau_mixcol = %h",$time,wire_to_shift_xor_or_reg);
-        end
-        if (c12) begin
-            $display("At time %0t: shift = %h",$time,wire_from_shift_decript);
-        end
-        if (c5 == 1'b1 || c17 == 1'b1) begin
-            $display("At time %0t: sbox_decript = %h",$time,wire_from_sbox_data_decript);
-        end
-        if (c16) begin
-            $display("At time %0t: xor_decript = %h",$time,xor_decript);
-        end
-        if (c10) begin
-            $display("At time %0t: mixcol_decript = %h",$time,wire_from_mixcol_decript);
-        end
-        if (c20) begin
-            $display("At time %0t: xor_decript_outbus = %h",$time,xor_decript_outbus);
-        end
-    end
+    //     //Decript
+    //     if (c11) begin
+    //         $display("At time %0t: xor_sau_mixcol = %h",$time,wire_to_shift_xor_or_reg);
+    //     end
+    //     if (c12) begin
+    //         $display("At time %0t: shift = %h",$time,wire_from_shift_decript);
+    //     end
+    //     if (c5 == 1'b1 || c17 == 1'b1) begin
+    //         $display("At time %0t: sbox_decript = %h",$time,wire_from_sbox_data_decript);
+    //     end
+    //     if (c16) begin
+    //         $display("At time %0t: xor_decript = %h",$time,xor_decript);
+    //     end
+    //     if (c10) begin
+    //         $display("At time %0t: mixcol_decript = %h",$time,wire_from_mixcol_decript);
+    //     end
+    //     if (c20) begin
+    //         $display("At time %0t: xor_decript_outbus = %h",$time,xor_decript_outbus);
+    //     end
+    // end
 
     //reg with data ------------------------------------------------------------
 
@@ -405,8 +413,8 @@ module crypto_block_tb();
         rst = 1;
         bgn = 0;
         cript_or_decript_signal = 2'b01;
-        key_inbus =  16'h1325;
         data_inbus = 16'h59B3;
+        key_inbus =  16'h1325;
 
         #50;
         rst = 0;
@@ -418,12 +426,12 @@ module crypto_block_tb();
 
         #200;
         bgn = 0;
-        #600;
+        #1600;
 
 
         cript_or_decript_signal = 2'b10;
-        key_inbus = 16'hff75;
-        data_inbus = 16'hbccc;
+        data_inbus = 16'h36cb;
+        key_inbus = 16'ha058;
 
         #50;
         rst = 0;
@@ -436,8 +444,42 @@ module crypto_block_tb();
 
         #200;
         bgn = 0;
-        #600;
+        #1600;
 
+        cript_or_decript_signal = 2'b01;
+        data_inbus = 16'h36cb;
+        key_inbus = 16'ha058;
+
+        #50;
+        rst = 0;
+        #50;
+
+        
+        #50;
+        rst = 1;
+        bgn = 1;
+
+        #200;
+        bgn = 0;
+        #1600;
+
+
+        cript_or_decript_signal = 2'b10;
+        data_inbus = 16'h5cfe;
+        key_inbus = 16'h83e6;
+
+        #50;
+        rst = 0;
+        #50;
+
+        
+        #50;
+        rst = 1;
+        bgn = 1;
+
+        #200;
+        bgn = 0;
+        #1600;
 
         $stop;
     end

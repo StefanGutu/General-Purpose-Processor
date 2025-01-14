@@ -143,7 +143,7 @@ module ControlUnit(
                 next_state <= CRIPT_CHECK_COUNTER;
             end
             CRIPT_CHECK_COUNTER : begin
-                if(fin_counter < 3'b001) begin
+                if(fin_counter < 3'b100) begin
                     next_state <= CRIPT_ADD_COUNTER;
                 end
                 else begin
@@ -172,7 +172,7 @@ module ControlUnit(
                 next_state <= CRIPT_CHECK_END;
             end 
             CRIPT_CHECK_END : begin
-                if(fin_counter < 3'b001) begin
+                if(fin_counter < 3'b100) begin
                     next_state <= CRIPT_SAVE_REG;
                 end
                 else begin
@@ -199,7 +199,7 @@ module ControlUnit(
                 next_state <= DECRIPT_CHECK_COUNT;
             end 
             DECRIPT_CHECK_COUNT : begin
-                if(fin_counter < 3'b001) begin
+                if(fin_counter < 3'b100) begin
                     next_state <= DECRIPT_SUB_COUNTER;
                 end
                 else begin
