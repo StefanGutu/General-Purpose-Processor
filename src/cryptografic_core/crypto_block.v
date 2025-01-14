@@ -1,11 +1,11 @@
-`include "counterCrypto.v"
-`include "crypto_ControlUnit.v"
-`include "inv_mix_columns.v"
-`include "key_data.v"
-`include "mix_columns.v"
-`include "reg_data.v"
-`include "S_Box.v"
-`include "shift_rows.v"
+`include "../cryptografic_core/counterCrypto.v"
+`include "../cryptografic_core/crypto_ControlUnit.v"
+`include "../cryptografic_core/inv_mix_columns.v"
+`include "../cryptografic_core/key_data.v"
+`include "../cryptografic_core/mix_columns.v"
+`include "../cryptografic_core/reg_data.v"
+`include "../cryptografic_core/S_Box.v"
+`include "../cryptografic_core/shift_rows.v"
 
 module crypto_block(
     input clk,
