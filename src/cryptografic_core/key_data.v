@@ -2,7 +2,7 @@ module key_reg(
     input clk,
     input rst,
     input save_key_bus, send_key_bus,
-    input get_key, send_key, 
+    input get_key,
     input [15:0] key_in,
     input [15:0] key_inbus,
     output reg [15:0] key_out,
@@ -25,7 +25,7 @@ module key_reg(
             if(get_key == 1'b1) begin
                 key_temp <= key_in;
             end
-            if(send_key == 1'b1) begin
+            else begin
                 key_out <= key_temp;
             end
         end

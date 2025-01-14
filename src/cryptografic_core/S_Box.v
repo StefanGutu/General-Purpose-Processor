@@ -270,7 +270,7 @@ module S_Box(
                     8'hff: new_val<=8'h16;
                 endcase
             end
-            else if(decript == 1'b1) begin
+            if(decript == 1'b1) begin
                 case(old_val)
                     8'h00:new_val<=8'h52;
                     8'h01:new_val<=8'h09;
@@ -533,8 +533,6 @@ module S_Box(
         end
         
     end
-
-
 
 endmodule
 
