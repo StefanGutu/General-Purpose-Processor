@@ -2,7 +2,7 @@ module reg_data(
     input clk,
     input rst,
     input save_info_bus, send_info_bus,
-    input save_info_reg, send_info_reg,
+    input save_info_reg,
     input [15:0] save_data_reg,
     input [15:0] save_data_bus,
     output reg [15:0] send_data_reg,
@@ -19,7 +19,7 @@ module reg_data(
             if(save_info_reg == 1'b1) begin
                 data <= save_data_reg;
             end
-            if(send_info_reg == 1'b1) begin
+            else begin
                 send_data_reg <= data;
             end
             if(save_info_bus == 1'b1) begin

@@ -7,39 +7,75 @@ module ControlUnit(
     output reg c0,c1,c2,c3,c4,c5,c6,c7,c8,c9,c10,c11,c12,c13,c14,c15,c16,c17,c18,c19,c20,c21
 );
 
-    reg [4:0] next_state, reg_state;
+    reg [5:0] next_state, reg_state;
 
-    parameter IDLE =                5'b00000;
-    parameter START =               5'b00001;
-    parameter GET_DATA_KEY =        5'b00010;
-    parameter CHECK_TYPE =          5'b00011;
+    parameter IDLE =                    6'b000000;
+    parameter START =                   6'b000001;
+    parameter GET_DATA_KEY =            6'b000010;
+    parameter CHECK_TYPE =              6'b000011;
     
-    parameter CRIPT_FIRST_XOR =     5'b00100;
-    parameter CRIPT_SAVE_REG =      5'b00101;
-    parameter CRIPT_SUBBOX =        5'b00110;
-    parameter CRIPT_SHIFT =         5'b00111;
-    parameter CRIPT_CHECK_COUNTER = 5'b01000;
-    parameter CRIPT_ADD_COUNTER =   5'b01001;
-    parameter CRIPT_MIXCOL =        5'b01010;
-    parameter CRIPT_SUBBOX_KEY =    5'b01011;
-    parameter CRIPT_XOR_KEY =       5'b01100;
+    parameter CRIPT_FIRST_XOR =         6'b000100;
+    parameter DELAY_CRIPT_FIRST_XOR =   6'b100100;
 
-    parameter DECRIPT_SAVE_REG =    5'b01101;
-    parameter DECRIPTFIRST_XOR =    5'b01110;
-    parameter DECRIPT_SHIFT =       5'b01111;
-    parameter DECRIPT_SUBBOX =      5'b10000;
-    parameter DECRIPT_CHECK_COUNT = 5'b10001;
-    parameter DECRIPT_SUB_COUNTER = 5'b10010;
-    parameter DECRIPT_SUBBOX_KEY =  5'b10011;
-    parameter DECRIPT_XOR_KEY =     5'b10100;
-    parameter DECRIPT_MIXCOL =      5'b10101;
-    parameter DECRIPT_LST_SUB_KEY = 5'b10110;
-    parameter DECRIPT_LST_XOR_KEY = 5'b10111;
+    parameter CRIPT_SAVE_REG =          6'b000101;
+    parameter DELAY_CRIPT_SAVE_REG =    6'b100101;
 
-    parameter CRIPT_CHECK_END     = 5'b11000;
-    parameter OUT_DATA            = 5'b11001;
-    parameter OUT_KEY             = 5'b11010;
-    parameter FIN                 = 5'b11011;
+    parameter CRIPT_SUBBOX =            6'b000110;
+    parameter DELAY_CRIPT_SUBBOX =      6'b100110;
+
+    parameter CRIPT_SHIFT =             6'b000111;
+    parameter DELAY_CRIPT_SHIFT =       6'b100111;
+
+    parameter CRIPT_CHECK_COUNTER =     6'b001000;
+
+    parameter CRIPT_ADD_COUNTER =       6'b001001;
+
+    parameter CRIPT_MIXCOL =            6'b001010;
+    parameter DELAY_CRIPT_MIXCOL =      6'b101010;
+
+    parameter CRIPT_SUBBOX_KEY =        6'b001011;
+    parameter DELAY_CRIPT_SUBBOX_KEY =  6'b101011;
+
+    parameter CRIPT_XOR_KEY =           6'b001100;
+    parameter DELAY_CRIPT_XOR_KEY =     6'b101100;
+
+
+
+    parameter DECRIPT_SAVE_REG =        6'b001101;
+    parameter DELAY_DECRIPT_SAVE_REG =  6'b101101;
+
+    parameter DECRIPTFIRST_XOR =        6'b001110;
+    parameter DELAY_DECRIPT_F_XOR =     6'b101110;
+
+    parameter DECRIPT_SHIFT =           6'b001111;
+    parameter DELAY_DECRIPT_SHIFT =     6'b101111;
+
+    parameter DECRIPT_SUBBOX =          6'b010000;
+    parameter DELAY_DECRIPT_SUBBOX =    6'b110000;
+
+    parameter DECRIPT_CHECK_COUNT =     6'b010001;
+
+    parameter DECRIPT_SUB_COUNTER =     6'b010010;
+
+    parameter DECRIPT_SUBBOX_KEY =      6'b010011;
+    parameter DELAY_DECRIPT_SUBB_KEY =  6'b110011;
+
+    parameter DECRIPT_XOR_KEY =         6'b010100;
+    parameter DELAY_DECRIPT_XOR_KEY =   6'b110100;
+
+    parameter DECRIPT_MIXCOL =          6'b010101;
+    parameter DELAY_DECRIPT_MIXCOL =    6'b110101;
+
+    parameter DECRIPT_LST_SUB_KEY =     6'b010110;
+    parameter DELAY_DECRIPT_LST_S_KEY = 6'b110110;
+
+    parameter DECRIPT_LST_XOR_KEY =     6'b010111;
+    parameter DELAY_DECRIPT_LST_X_KEY = 6'b110111;
+
+    parameter CRIPT_CHECK_END     =     6'b011000;
+    parameter OUT_DATA            =     6'b011001;
+    parameter OUT_KEY             =     6'b011010;
+    parameter FIN                 =     6'b011011;
 
 
 
@@ -83,19 +119,31 @@ module ControlUnit(
             end
             //Part with CRIPT -----------------------------------------------------------------------
             CRIPT_FIRST_XOR : begin
+                next_state <= DELAY_CRIPT_FIRST_XOR;
+            end
+            DELAY_CRIPT_FIRST_XOR : begin
                 next_state <= CRIPT_SAVE_REG;
             end
             CRIPT_SAVE_REG : begin
+                next_state <= DELAY_CRIPT_SAVE_REG;
+            end
+            DELAY_CRIPT_SAVE_REG : begin
                 next_state <= CRIPT_SUBBOX;
             end
             CRIPT_SUBBOX : begin
+                next_state <=  DELAY_CRIPT_SUBBOX;
+            end
+            DELAY_CRIPT_SUBBOX : begin
                 next_state <= CRIPT_SHIFT;
             end
             CRIPT_SHIFT : begin
+                next_state <= DELAY_CRIPT_SHIFT;
+            end
+            DELAY_CRIPT_SHIFT : begin
                 next_state <= CRIPT_CHECK_COUNTER;
             end
             CRIPT_CHECK_COUNTER : begin
-                if(fin_counter < 3'b100) begin
+                if(fin_counter < 3'b001) begin
                     next_state <= CRIPT_ADD_COUNTER;
                 end
                 else begin
@@ -106,16 +154,25 @@ module ControlUnit(
                 next_state <= CRIPT_MIXCOL;
             end
             CRIPT_MIXCOL : begin
+                next_state <= DELAY_CRIPT_MIXCOL;
+            end
+            DELAY_CRIPT_MIXCOL : begin
                 next_state <= CRIPT_SUBBOX_KEY;
             end
             CRIPT_SUBBOX_KEY : begin
+                next_state <= DELAY_CRIPT_SUBBOX_KEY;
+            end
+            DELAY_CRIPT_SUBBOX_KEY : begin
                 next_state <= CRIPT_XOR_KEY;
             end
             CRIPT_XOR_KEY : begin
-                next_state <= CRIPT_CHECK_END;
+                next_state <= DELAY_CRIPT_XOR_KEY;
             end
+            DELAY_CRIPT_XOR_KEY : begin
+                next_state <= CRIPT_CHECK_END;
+            end 
             CRIPT_CHECK_END : begin
-                if(fin_counter < 3'b100) begin
+                if(fin_counter < 3'b001) begin
                     next_state <= CRIPT_SAVE_REG;
                 end
                 else begin
@@ -124,19 +181,25 @@ module ControlUnit(
             end
             //Part with DECRIPT -----------------------------------------------------------------------
             DECRIPTFIRST_XOR : begin
-                next_state <= DECRIPT_SAVE_REG;
+                next_state <= DELAY_DECRIPT_F_XOR;
             end
-            DECRIPT_SAVE_REG : begin
+            DELAY_DECRIPT_F_XOR : begin
                 next_state <= DECRIPT_SHIFT;
             end
             DECRIPT_SHIFT : begin
+                next_state <= DELAY_DECRIPT_SHIFT;
+            end
+            DELAY_DECRIPT_SHIFT : begin
                 next_state <= DECRIPT_SUBBOX;
             end
             DECRIPT_SUBBOX : begin
-                next_state <= DECRIPT_CHECK_COUNT;
+                next_state <= DELAY_DECRIPT_SUBBOX;
             end
+            DELAY_DECRIPT_SUBBOX : begin
+                next_state <= DECRIPT_CHECK_COUNT;
+            end 
             DECRIPT_CHECK_COUNT : begin
-                if(fin_counter < 3'b100) begin
+                if(fin_counter < 3'b001) begin
                     next_state <= DECRIPT_SUB_COUNTER;
                 end
                 else begin
@@ -147,18 +210,39 @@ module ControlUnit(
                 next_state <= DECRIPT_SUBBOX_KEY;
             end
             DECRIPT_SUBBOX_KEY : begin
+                next_state <= DELAY_DECRIPT_SUBB_KEY;
+            end
+            DELAY_DECRIPT_SUBB_KEY : begin
                 next_state <= DECRIPT_XOR_KEY;
             end
             DECRIPT_XOR_KEY : begin
+                next_state <= DELAY_DECRIPT_XOR_KEY;
+            end
+            DELAY_DECRIPT_XOR_KEY : begin
                 next_state <= DECRIPT_MIXCOL;
             end
             DECRIPT_MIXCOL : begin
+                next_state <= DELAY_DECRIPT_MIXCOL;
+            end
+            DELAY_DECRIPT_MIXCOL : begin
                 next_state <= DECRIPT_SAVE_REG;
             end
+            DECRIPT_SAVE_REG : begin
+                next_state <= DELAY_DECRIPT_SAVE_REG;
+            end
+            DELAY_DECRIPT_SAVE_REG : begin
+                next_state <= DECRIPT_SHIFT;
+            end
             DECRIPT_LST_SUB_KEY : begin
+                next_state <= DELAY_DECRIPT_LST_S_KEY;
+            end
+            DELAY_DECRIPT_LST_S_KEY : begin
                 next_state <= DECRIPT_LST_XOR_KEY;
             end
             DECRIPT_LST_XOR_KEY : begin
+                next_state <= DELAY_DECRIPT_LST_X_KEY;
+            end
+            DELAY_DECRIPT_LST_X_KEY : begin
                 next_state <= OUT_DATA;
             end
             //Common end ------------------------------------------------------------------------------
