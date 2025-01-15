@@ -94,10 +94,6 @@ int main() {
                 decimalToBinaryString(6, 1, val_for_instr);
             } else if (strcmp(instruction, mem_instr[1]) == 0) { //PT STR
                 decimalToBinaryString(6, 2, val_for_instr);
-            } else if (strcmp(instruction, mem_instr[2]) == 0) { //PT STA
-                decimalToBinaryString(6, 3, val_for_instr);
-            } else if (strcmp(instruction, mem_instr[3]) == 0) { //PT LDA
-                decimalToBinaryString(6, 4, val_for_instr);
             } else if (strcmp(instruction, crypto) == 0) { //CRP
                 decimalToBinaryString(6, 30, val_for_instr);
             }else {
@@ -113,8 +109,13 @@ int main() {
             
             decimalToBinaryString(10,address,val_for_address);
 
+            if (strcmp(instruction, mem_instr[2]) == 0) { //PT STA
+                decimalToBinaryString(6, 3, val_for_instr);
+            } else if (strcmp(instruction, mem_instr[3]) == 0) { //PT LDA
+                decimalToBinaryString(6, 4, val_for_instr);
+            }
 
-            for (int i = 0; i < 7; i++) { //Pt branch instruction 
+            for (int i = 0; i < 6; i++) { //Pt branch instruction 
                 if (strcmp(branch_instr[i], instruction) == 0) {
                     decimalToBinaryString(6, i + 5, val_for_instr);
                     break;
@@ -123,6 +124,12 @@ int main() {
         } else if (sscanf(assembly_line, "%s", instruction) == 1) {
 
             branch_or_no = 3;
+
+            if (strcmp(branch_instr[6], instruction) == 0) {
+                decimalToBinaryString(10, 0, val_for_address);
+                decimalToBinaryString(6, 11, val_for_instr);
+                branch_or_no = 2;
+            }
 
             
         }else {   

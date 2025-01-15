@@ -11,10 +11,12 @@ module ProgramCounter (
     input save_address_from_counter,                //signal to save address from PC counter
     input increm_pc,
 
-    output reg [15:0] pc_out
+    output reg [15:0] pc_out,
+    output reg [15:0] pc_out_for_mem
 );
 
     reg [15:0] address_data;
+    reg [15:0] old_address_to_send;
 
     always @(posedge clk or negedge reset) begin
         if (!reset) begin
@@ -23,6 +25,7 @@ module ProgramCounter (
         else begin
             //For Instr memory
             if (save_address_from_instr_mem == 1'b1) begin
+                pc_out_for_mem <= address_data;
                 address_data <= address_from_instr_mem;
             end 
 
@@ -88,13 +91,14 @@ module StackPointer (
         else begin
             if (push == 1'b1) begin
                 sp_reg <= sp_reg - 16'b0001 ; 
+
             end
             else if (pop == 1'b1) begin
                 sp_reg <= sp_reg + 16'b0001 ; 
+
             end
-            else begin
-                sp_out <= sp_reg;
-            end
+            sp_out <= sp_reg;
+            
         end
     end
 endmodule

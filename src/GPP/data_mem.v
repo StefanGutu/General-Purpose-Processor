@@ -42,16 +42,18 @@ module data_mem #(parameter WIDTH=15)(
         end
         else if (signal_pc_data_write == 1'b1) begin
             memory[sp_address] <= pc_data;
+            $display("Time: %0t  data_mem_pc_new : %b\n",$time, pc_data);
         end
         else if(signal_crypto_data_write == 1'b1) begin
             memory[address] <= crypto_data;
         end
-        else begin
-            read_data <= memory[address];
-            acc_read_data <= memory[address];
-            pc_read_data <= memory[sp_address] + 1'b1;
-            crypto_read_data <= memory[address];
-        end
+
+        read_data <= memory[address];
+        acc_read_data <= memory[address];
+        pc_read_data <= memory[sp_address];
+        // $display("Time: %0t  data_mem : %b\n",$time, memory[sp_address]);
+        crypto_read_data <= memory[address];
+
     end
 
 endmodule

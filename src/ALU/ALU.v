@@ -277,7 +277,7 @@ module FSM16bit(
             zero_flag <= 1'b0;
         end else begin
             case (current_state)
-                ADD: begin result <= a+b; cout <= add_cout; overflow_flag <= (add_result != {add_cout, add_result}); negative_flag <= add_result[15]; carry_flag <= add_cout; zero_flag <= (add_result == 16'b0); end
+                ADD: begin result <= a+b; cout <= add_cout; overflow_flag <= (~a[15] & ~b[15] & result[15]) | (a[15] & b[15] & ~result[15]); negative_flag <= add_result[15]; carry_flag <= add_cout; zero_flag <= (add_result == 16'b0); end
                 SUB: begin result <= sub_result; bout <= sub_bout; overflow_flag <= (sub_result != {sub_bout, sub_result}); negative_flag <= sub_result[15]; carry_flag <= sub_bout; zero_flag <= (sub_result == 16'b0); end
                 INC: begin result <= inc_result; overflow_flag <= (a == 16'b1111111111111111); negative_flag <= inc_result[15]; carry_flag <= (a == 16'b1111111111111111); zero_flag <= (inc_result == 16'b0); end
                 DEC: begin result <= dec_result; overflow_flag <= (a == 16'd0); negative_flag <= dec_result[15]; carry_flag <= (a == 16'd0); zero_flag <= (dec_result == 16'b0); end
