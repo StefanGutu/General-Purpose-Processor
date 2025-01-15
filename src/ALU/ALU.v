@@ -260,8 +260,6 @@ module FSM16bit(
         if (!rst) begin
             result <= 16'b0;
             remainder <= 16'b0;
-            bout <= 16'b0;
-            cout <= 16'b0;
             overflow_flag <= 1'b0; 
             negative_flag <= 1'b0; 
             carry_flag <= 1'b0; 
