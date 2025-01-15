@@ -1,4 +1,3 @@
-`include "../ALU/ADDER/Add.v"
 `timescale 1ns / 1ps
 module Add(a,b,sum,clk,rst);
 input [15:0] a,b;
