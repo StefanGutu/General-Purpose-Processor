@@ -348,7 +348,7 @@ module tb_FSM16bit;
 
         // Test ADD
         #10;
-        op_code = 6'b000001; // ADD
+        op_code = 6'b001100; // ADD
         a = 16'd10;
         b = 16'd5;
         #10;
@@ -356,7 +356,7 @@ module tb_FSM16bit;
 
         // Test SUB
         #10;
-        op_code = 6'b000010; // SUB
+        op_code = 6'b001101; // SUB
         a = 16'd0;
         b = 16'd5;
         #10;
@@ -364,21 +364,21 @@ module tb_FSM16bit;
 
         // Test INC
         #10;
-        op_code = 6'b000011; // INC
+        op_code = 6'b011100; // INC
         a = 16'd10;
         #10;
         check_result("INC", result, 16'd11, overflow_flag, carry_flag, zero_flag, negative_flag); // Expect 10 + 1 = 11
 
         // Test DEC
         #10;
-        op_code = 6'b000100; // DEC
+        op_code = 6'b011101; // DEC
         a = 16'd10;
         #10;
         check_result("DEC", result, 16'd9, overflow_flag, carry_flag, zero_flag, negative_flag); // Expect 10 - 1 = 9
 
         // Test MOD
         #10;
-        op_code = 6'b000101; // MOD
+        op_code = 6'b010101; // MOD
         a = 16'd10;
         b = 16'd3;
         #10;
@@ -386,7 +386,7 @@ module tb_FSM16bit;
 
         // Test AND
         #10;
-        op_code = 6'b000110; // AND
+        op_code = 6'b010110; // AND
         a = 16'd15;
         b = 16'd7;
         #10;
@@ -394,21 +394,21 @@ module tb_FSM16bit;
 
         // Test OR
         #10;
-        op_code = 6'b001010; // OR
+        op_code = 6'b010111; // OR
         a = 16'd15;
         b = 16'd7;
         #10;
         check_result("OR", result, 16'd15, overflow_flag, carry_flag, zero_flag, negative_flag); // Expect 15 | 7 = 15
 
         #10;
-        op_code = 6'b010001; // DIV
+        op_code = 6'b010100; // DIV
         a = 16'd15;
         b = 16'd7;
         #10;
         check_division_result("DIV", result, 16'd2, remainder, 16'd1, overflow_flag, carry_flag, zero_flag, negative_flag); 
         // Test XOR
         #10;
-        op_code = 6'b001011; // XOR
+        op_code = 6'b011000; // XOR
         a = 16'd15;
         b = 16'd7;
         #10;
@@ -416,14 +416,14 @@ module tb_FSM16bit;
 
         // Test NOT
         #10;
-        op_code = 6'b001001; // NOT
+        op_code = 6'b011001; // NOT
         a = 16'd10;
         #10;
         check_result("NOT", result, 16'b1111111111110101, overflow_flag, carry_flag, zero_flag, negative_flag); // Expect ~10
 
         // Test MOV
         #10;
-        op_code = 6'b001000; // MOV
+        op_code = 6'b010010; // MOV
         a = 16'd5;
         mov_enable = 1;    // Activăm semnalul de mutare
         #10;
@@ -431,7 +431,7 @@ module tb_FSM16bit;
 
         // Test LSL
         #10;
-        op_code = 6'b001101; // LSL
+        op_code = 6'b001111; // LSL
         a = 16'd10;
         b = 16'd3; // Shift left by 3
         #10;
@@ -447,7 +447,7 @@ module tb_FSM16bit;
 
         // Test RSL
         #10;
-        op_code = 6'b001111; // RSL
+        op_code = 6'b010001; // RSL
         a = 16'd10;
         b = 16'd3; // Rotate left by 3
         #10;
@@ -463,7 +463,7 @@ module tb_FSM16bit;
 
         // Test MUL
         #10;
-        op_code = 6'b001100; // MUL
+        op_code = 6'b010011; // MUL
         a = 16'd65535;
         b = 16'd65535;
         #10;
@@ -471,7 +471,7 @@ module tb_FSM16bit;
 
         //TEST CMP
         #10;
-        op_code = 6'b000111;
+        op_code = 6'b011010;
         a = 16'd4;
         b = 16'd7;
         #10;
@@ -479,7 +479,7 @@ module tb_FSM16bit;
 
         //Test TST
         #10;
-        op_code = 6'b010010;
+        op_code = 6'b011011;
         a = 16'd5;
         b = 16'd7;
         #10;
