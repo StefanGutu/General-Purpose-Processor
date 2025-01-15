@@ -75,7 +75,8 @@ module ControlUnit(
     parameter CRIPT_CHECK_END     =     6'b011000;
     parameter OUT_DATA            =     6'b011001;
     parameter OUT_KEY             =     6'b011010;
-    parameter FIN                 =     6'b011011;
+    parameter DELAY_KEY           =     6'b011011;
+    parameter FIN                 =     6'b011100;
 
 
 
@@ -86,6 +87,7 @@ module ControlUnit(
         end
         else begin
             reg_state <= next_state;
+            // $monitor("crypto state : %b ", next_state);
         end
     end
 
@@ -250,6 +252,9 @@ module ControlUnit(
                 next_state <= OUT_KEY;
             end
             OUT_KEY : begin
+                next_state <= DELAY_KEY;
+            end
+            DELAY_KEY : begin
                 next_state <= FIN;
             end
             FIN : begin
@@ -323,10 +328,11 @@ module ControlUnit(
                 c18 <= 1'b1;
             end
             //OUTBUS
-            OUT_DATA : begin
+
+            OUT_KEY : begin
                 c19 <= 1'b1;
             end
-            OUT_KEY : begin
+            DELAY_KEY : begin
                 c20 <= 1'b1;
             end
             FIN : begin

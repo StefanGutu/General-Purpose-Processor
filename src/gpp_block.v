@@ -9,6 +9,7 @@
 module cpu_block(
     input clk,
     input rst,
+    input rst_cript,
     input bgn,
     input [15:0] key_inbus,
     output reg c0,c1,c2,c3,c4,c5,c6,c7,c8,c9,c10,c11,c12,c13,c14,c15,c16,c17,c18,c19,c20,c21,c22,c23,c24,
@@ -32,6 +33,7 @@ module cpu_block(
 
     //Wire key crypto
     wire [15:0] wire_from_crypto_block_key;
+    reg [1:0] reg_for_crypto_type;
 
     //Wires from data mem
     wire [15:0] wire_from_data_mem_for_reg_x_y;
@@ -142,19 +144,19 @@ module cpu_block(
             $display("Time: %0t  PC : %b\n",$time, wire_from_pc);
         end
         if(c17) begin
-            $display("Time: %0t  data_a : %b   data_b : %b\n",$time, {7'b0,wire_from_instr_mem[8:0]}, wire_from_general_p_reg_registers);
+            $display("Time: %0t  data_a : %h   data_b : %h\n",$time, {7'b0,wire_from_instr_mem[8:0]}, wire_from_general_p_reg_registers);
         end
         if(c24) begin
-            $display("Time: %0t  ALU : %b\n",$time, wire_frm_alu_result_to_acc);
+            $display("Time: %0t  ALU : %h\n",$time, wire_frm_alu_result_to_acc);
         end
         if(c8) begin
-            $display("Time: %0t  ACC_data_mem : %b\n",$time, wire_from_general_p_reg_acc);
+            $display("Time: %0t  ACC_data_mem : %h\n",$time, wire_from_general_p_reg_acc);
         end
         if(c5) begin
-            $display("Time: %0t  val_for_next_reg : %b\n",$time, wire_from_data_mem_for_reg_x_y);
+            $display("Time: %0t  val_for_next_reg : %h\n",$time, wire_from_data_mem_for_reg_x_y);
         end
         if(c4) begin
-            $display("Time: %0t  from_register : %b\n",$time, wire_from_general_p_reg_registers);
+            $display("Time: %0t  from_register : %h\n",$time, wire_from_general_p_reg_registers);
         end
     end
 
@@ -309,13 +311,22 @@ module cpu_block(
         .zero_flag(wire_from_alu_flags[3])
     );
 
-    
+    always @(posedge clk) begin
+        if (wire_from_control_unit_start_crypt == 1'b1) begin
+            reg_for_crypto_type <= 2'b01;
+        end
+        else if(wire_from_control_unit_start_decrypt == 1'b1) begin
+            reg_for_crypto_type <= 2'b10;
+        end
+        key_outbus <= wire_from_crypto_block_key;
+
+    end
 
     crypto_block crypto_block_i(
-        .clk(clk), .rst(rst),
+        .clk(clk), .rst(rst_cript),
         .key_inbus(key_inbus),
         .data_inbus(wire_from_data_mem_for_crypto),
-        .cript_or_decript_signal({wire_from_control_unit_start_decrypt, wire_from_control_unit_start_crypt}),
+        .cript_or_decript_signal(reg_for_crypto_type),
         .bgn(wire_from_control_unit_start_execute_crypto),
         .fin(fin_crypto),
         .key_outbus(wire_from_crypto_block_key),
@@ -337,6 +348,7 @@ module cpu_block_tb();
     wire fin_cript;
     wire [15:0] key_outbus;
     wire fin;
+    reg rst_cript;
 
 
     wire c0, c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15;
@@ -345,6 +357,7 @@ module cpu_block_tb();
     cpu_block uut (
         .clk(clk),
         .rst(rst),
+        .rst_cript(rst_cript),
         .bgn(bgn),
         .key_inbus(key_inbus),
         .c0(c0), .c1(c1), .c2(c2), .c3(c3), .c4(c4),
@@ -367,20 +380,34 @@ module cpu_block_tb();
     initial begin
 
         rst = 1;
+        rst_cript = 1'b1;
         bgn = 0;
-        key_inbus = 16'h1234; 
+        key_inbus = 16'h1325;
 
         #100; 
         rst = 0;
+        rst_cript = 1'b0;
 
 
         #100;
         rst = 1; 
+        rst_cript = 1'b1;
         bgn = 1;
         #100;
         bgn = 0;
+
         
         while (fin == 1'b0) begin
+
+            if (fin_cript == 1'b1) begin    
+                key_inbus = 16'ha058;
+                #400;
+                rst_cript = 1'b0;
+                #100;
+                rst_cript = 1'b1;
+                #100;
+            end
+
             #100;
         end
 

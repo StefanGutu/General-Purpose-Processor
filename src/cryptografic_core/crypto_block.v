@@ -14,8 +14,9 @@ module crypto_block(
     input [15:0] data_inbus,
     input [1:0] cript_or_decript_signal,
     input bgn,
-    output reg c00,c01,c02,c03,c04,c05,c06,c07,c08,c09,c010,c011,c012,c013,c014,c015,c016,c017,c018,c019,c020,c021,
-    output reg [2:0] counter,
+    // output reg c00,c01,c02,c03,c04,c05,c06,c07,c08,c09,c010,c011,c012,c013,c014,c015,c016,c017,c018,c019,c020,c021,
+    // output reg [2:0] counter,
+    output reg fin,
     output reg [15:0] key_outbus,
     output reg [15:0] data_outbus
 );
@@ -73,8 +74,9 @@ module crypto_block(
     wire c0,c1,c2,c3,c4,c5,c6,c7,c8,c9,c10,c11,c12,c13,c14,c15,c16,c17,c18,c19,c20,c21;
 
     always @(posedge clk) begin
-        {c00,c01,c02,c03,c04,c05,c06,c07,c08,c09,c010,c011,c012,c013,c014,c015,c016,c017,c018,c019,c020,c021} <= {c0,c1,c2,c3,c4,c5,c6,c7,c8,c9,c10,c11,c12,c13,c14,c15,c16,c17,c18,c19,c20,c21};
-        counter <= wire_from_counter;
+        // {c00,c01,c02,c03,c04,c05,c06,c07,c08,c09,c010,c011,c012,c013,c014,c015,c016,c017,c018,c019,c020,c021} <= {c0,c1,c2,c3,c4,c5,c6,c7,c8,c9,c10,c11,c12,c13,c14,c15,c16,c17,c18,c19,c20,c21};
+        // counter <= wire_from_counter;
+        fin <= c21;
     end
 
     //Control Unit ----------------------------------------------------------------
@@ -121,11 +123,11 @@ module crypto_block(
         // end
         if(cript_or_decript_signal == 2'b01 && c21 == 1'b1) begin
             key_outbus <= wire_key_outbus_cript;
-            $display("At time %0t: wire_key_outbus_cript = %h\n", $time, wire_key_outbus_cript);
+            $display("At time %0t:cript_or_decript_signal:%b | wire_key_outbus_cript = %h\n", $time,cript_or_decript_signal, wire_key_outbus_cript);
         end
-        if(cript_or_decript_signal == 2'b10 && c21 == 1'b1) begin
+        if(cript_or_decript_signal == 2'b10 && c20 == 1'b1) begin
             key_outbus <= wire_key_outbus_decript;
-            $display("At time %0t: wire_key_outbus_decript = %h\n", $time, wire_to_get_out_sbox);
+            $display("At time %0t:cript_or_decript_signal:%b | wire_key_outbus_decript = %h\n", $time,cript_or_decript_signal, wire_to_get_out_sbox);
         end
     end
 
@@ -169,6 +171,9 @@ module crypto_block(
     end
 
     always @(posedge clk) begin
+        // if (c0) begin
+        //     $display("At time %0t: data_in = %h | key_in = %h",$time,data_inbus, key_inbus);
+        // end
         if(cript_or_decript_signal == 2'b10 && c20 == 1'b1) begin
             data_outbus <= xor_decript_outbus;
             $display("At time %0t: wire_data_outbus_decript = %h", $time, xor_decript_outbus);
