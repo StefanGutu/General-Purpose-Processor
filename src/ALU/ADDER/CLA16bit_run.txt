@@ -1,8 +1,8 @@
 # add all Verilog source files, separated by spaces
-set sourcefiles {CLA16bit.v}
+set sourcefiles {Add.v}
 
 # set name of the top module
-set topmodule carry_look_ahead_16bit_tb
+set topmodule tb_Add
 
 ###################################################
 #####DO NOT MODIFY THE SCRIPT BELLOW THIS LINE#####
