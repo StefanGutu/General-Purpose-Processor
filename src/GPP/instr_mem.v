@@ -44,6 +44,7 @@ module instr_mem(
             else if(read_memory == 1'b1) begin //signal to read from the memory
                 return_instr_line[15:0] = instruction_data[pos];    //with pos you specify where to read from instruction memory
                                                                     //will help us with branch
+                $display("Time:%0t  ||  Instructiunea nr %d\n", $time, pos+1);
             end
             
            

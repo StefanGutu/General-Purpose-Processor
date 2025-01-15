@@ -30,7 +30,7 @@ module general_purpose_registers (
         end else begin
             if (reg_write_x) begin
                 reg_x <= data_in; // Write to register X
-                $display("Time: %0t  reg_x : %b\n",$time, data_in);
+                $display("Time: %0t  reg_x : %h\n",$time, data_in);
             end
             
             if (reg_write_y) begin
