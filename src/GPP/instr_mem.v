@@ -16,7 +16,7 @@ module instr_mem(
     integer scan_file;
 
     initial begin
-        data_file = $fopen("../GPP/res_in_bin.txt", "r");
+        data_file = $fopen("../../exemplu/testcase/res_in_bin.txt", "r");
         if (data_file == `NULL) begin
             $display("data_file handle was NULL");
             $finish;

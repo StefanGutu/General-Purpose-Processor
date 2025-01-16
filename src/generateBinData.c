@@ -45,14 +45,14 @@ void decimalToBinaryString(int num,int decimal_num, char *binary_str) {
 int main() {
     FILE *file;
 
-    if((file = fopen("testcase/assembly.txt", "r")) == NULL){
+    if((file = fopen("../exemplu/testcase/assembly.txt", "r")) == NULL){
         printf("Error to open assembly.txt to read!");
         exit(EXIT_FAILURE);
     }
 
     FILE *out;
 
-    if((out = fopen("GPP/res_in_bin.txt","w")) == NULL){
+    if((out = fopen("../exemplu/testcase/res_in_bin.txt","w")) == NULL){
         printf("Error to open res_in_bin.txt to write!");
         exit(EXIT_FAILURE);
     }
