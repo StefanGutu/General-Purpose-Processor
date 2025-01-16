@@ -106,7 +106,11 @@ module control_unit(
 
 	//For END program
 	parameter SAVE_ACC =				6'b100111;
-	parameter END_EXECUTION =			6'b101000;			
+	parameter END_EXECUTION =			6'b101000;	
+
+	//Delays
+	parameter DELAY_PULL =				6'b101001;	
+	parameter DELAY_PULL_2 =			6'b101010;	
 
 
 	
@@ -272,20 +276,27 @@ module control_unit(
 					next_state <= BRANCH_ALWAYS;
 				end
 				else if (opcode == 6'b001010 ) begin			//JMP
-					next_state <= PUSH_SP;
+					next_state <= PC_JUMP_AFTER_PUSH;
 				end
 			end
 			PULL_SP : begin
+				next_state <= DELAY_PULL;
+				// next_state <= PC_JUMP_AFTER_PULL;
+			end
+			DELAY_PULL : begin
 				next_state <= PC_JUMP_AFTER_PULL;
 			end
 			PC_JUMP_AFTER_PULL : begin
+				next_state <= DELAY_PULL_2;
+				// next_state <= GET_LINE_WITH_PC;
+			end
+			DELAY_PULL_2 : begin
 				next_state <= GET_LINE_WITH_PC;
 			end
-
-			PUSH_SP : begin
-				next_state <= PC_JUMP_AFTER_PUSH;
-			end
 			PC_JUMP_AFTER_PUSH : begin
+				next_state <= PUSH_SP;
+			end
+			PUSH_SP : begin
 				next_state <= JUMP_BRANCH;
 			end
 
@@ -478,7 +489,7 @@ module control_unit(
 			end
 			//RET 
 			PULL_SP : begin
-				mem_read <= 1'b1;
+				// mem_read <= 1'b1;
 				POP <= 1'b1;
 			end
 			PC_JUMP_AFTER_PULL : begin
