@@ -3,7 +3,7 @@
 `include "../ALU/SHIFTER/LSR.v"
 `include "../ALU/SHIFTER/RSL.v"
 `include "../ALU/SHIFTER/RSR.v"
-`include "../ALU/SUBSTRACTOR/FSC16bit.v"
+`include "../ALU/SUBSTRACTOR/Sub.v"
 `include "../ALU/LOGICALOPERATIONS/and.v"
 `include "../ALU/LOGICALOPERATIONS/cmp.v"
 `include "../ALU/LOGICALOPERATIONS/not.v"
@@ -15,7 +15,7 @@
 `include "../ALU/ARITHMETICOPERATIONS/dec.v"
 `include "../ALU/ARITHMETICOPERATIONS/inc.v"
 `include "../ALU/ARITHMETICOPERATIONS/mod.v"
-`include "../ALU/ADDER/CLA16bit.v"
+`include "../ALU/ADDER/Add.v"
 
 module FSM16bit(
     input wire clk,
@@ -24,13 +24,9 @@ module FSM16bit(
     input wire mov_enable,
     input wire [5:0] op_code,  
     input wire [15:0] a,       
-    input wire [15:0] b,      
-    input wire bin,
-    input wire cin,            
+    input wire [15:0] b,                 
     output reg [15:0] result,
-    output reg [15:0] remainder,
-    output reg bout,
-    output reg cout,           
+    output reg [15:0] remainder,       
     output reg busy,
     output reg carry_flag,
     output reg negative_flag,
@@ -65,15 +61,12 @@ module FSM16bit(
     wire [15:0] add_result, sub_result, inc_result, dec_result, mod_result, div_result, remainder_res;
     wire [15:0] and_result, or_result, xor_result, not_result, mov_result, mul_result, cmp_result, tst_result;
     wire [15:0] lsl_result, lsr_result, rsl_result, rsr_result;
-    wire sub_bout, add_cout;
     wire neg_flag, ovf_flag, ze_flag, carr_flag;
 
-    CLA16bit adder (
+     Add adder (
         .a(a),
         .b(b),
-        .cin(cin),
         .sum(add_result),
-        .cout(add_cout),
         .clk(clk),
         .rst(rst)
     );
@@ -87,12 +80,10 @@ module FSM16bit(
         .remainder(remainder_res)
     );   
 
-    FullSubtractor16bit subtractor (
+    Sub subtractor (
         .a(a),
         .b(b),
-        .bin(bin),
         .diff(sub_result),
-        .bout(sub_bout),
         .clk(clk),
         .rst(rst)
     );
@@ -269,16 +260,14 @@ module FSM16bit(
         if (!rst) begin
             result <= 16'b0;
             remainder <= 16'b0;
-            bout <= 16'b0;
-            cout <= 16'b0;
             overflow_flag <= 1'b0; 
             negative_flag <= 1'b0; 
             carry_flag <= 1'b0; 
             zero_flag <= 1'b0;
         end else begin
             case (current_state)
-                ADD: begin result <= a+b; cout <= add_cout; overflow_flag <= (~a[15] & ~b[15] & result[15]) | (a[15] & b[15] & ~result[15]); negative_flag <= add_result[15]; carry_flag <= add_cout; zero_flag <= (add_result == 16'b0); end
-                SUB: begin result <= sub_result; bout <= sub_bout; overflow_flag <= (sub_result != {sub_bout, sub_result}); negative_flag <= sub_result[15]; carry_flag <= sub_bout; zero_flag <= (sub_result == 16'b0); end
+                ADD: begin result <= add_result; overflow_flag <= (~a[15] & ~b[15] & result[15]) | (a[15] & b[15] & ~result[15]); negative_flag <= add_result[15]; carry_flag <= (a + b) > 16'hFFFF; zero_flag <= (add_result == 16'b0); end
+                SUB: begin result <= sub_result; overflow_flag <= (a[15] & ~b[15] & ~result[15]) | (~a[15] & b[15] & result[15]); negative_flag <= sub_result[15]; carry_flag <= (a < b); zero_flag <= (sub_result == 16'b0); end
                 INC: begin result <= inc_result; overflow_flag <= (a == 16'b1111111111111111); negative_flag <= inc_result[15]; carry_flag <= (a == 16'b1111111111111111); zero_flag <= (inc_result == 16'b0); end
                 DEC: begin result <= dec_result; overflow_flag <= (a == 16'd0); negative_flag <= dec_result[15]; carry_flag <= (a == 16'd0); zero_flag <= (dec_result == 16'b0); end
                 MOD: begin result <= mod_result; overflow_flag <= 1'b0; negative_flag <= mod_result[15]; carry_flag <= 1'b0; zero_flag <= (mod_result == 16'b0); end
@@ -313,12 +302,8 @@ module tb_FSM16bit;
     reg [5:0] op_code;
     reg [15:0] a;
     reg [15:0] b;
-    reg bin;
-    reg cin;
     wire [15:0] result;
-    wire bout;
     wire busy;
-    wire cout;
     reg mov_enable;
     wire [15:0] remainder;
     wire zero_flag, overflow_flag, carry_flag, negative_flag;
@@ -332,12 +317,8 @@ module tb_FSM16bit;
         .op_code(op_code),
         .a(a),
         .b(b),
-        .bin(bin),
-        .cin(cin),
         .result(result),
         .remainder(remainder),
-        .cout(cout),
-        .bout(bout),
         .busy(busy),
         .zero_flag(zero_flag),
         .negative_flag(negative_flag),
@@ -359,8 +340,6 @@ module tb_FSM16bit;
         a = 16'b0;
         b = 16'b0;
         start = 1;
-        bin = 0;
-        cin = 0;
 
         // Reset FSM
         #10 rst = 1;
@@ -369,41 +348,37 @@ module tb_FSM16bit;
 
         // Test ADD
         #10;
-        op_code = 6'b000001; // ADD
+        op_code = 6'b001100; // ADD
         a = 16'd10;
         b = 16'd5;
-        cin = 0;
-        bin = 0;
         #10;
         check_result("ADD", result, 16'd15, overflow_flag, carry_flag, zero_flag, negative_flag); // Expect 10 + 5 = 15
 
         // Test SUB
         #10;
-        op_code = 6'b000010; // SUB
+        op_code = 6'b001101; // SUB
         a = 16'd0;
         b = 16'd5;
-        cin = 0;
-        bin = 0;
         #10;
         check_result("SUB", result, 16'b1111111111111011, overflow_flag, carry_flag, zero_flag, negative_flag); // Expect 15 - 5 = 10
 
         // Test INC
         #10;
-        op_code = 6'b000011; // INC
+        op_code = 6'b011100; // INC
         a = 16'd10;
         #10;
         check_result("INC", result, 16'd11, overflow_flag, carry_flag, zero_flag, negative_flag); // Expect 10 + 1 = 11
 
         // Test DEC
         #10;
-        op_code = 6'b000100; // DEC
+        op_code = 6'b011101; // DEC
         a = 16'd10;
         #10;
         check_result("DEC", result, 16'd9, overflow_flag, carry_flag, zero_flag, negative_flag); // Expect 10 - 1 = 9
 
         // Test MOD
         #10;
-        op_code = 6'b000101; // MOD
+        op_code = 6'b010101; // MOD
         a = 16'd10;
         b = 16'd3;
         #10;
@@ -411,7 +386,7 @@ module tb_FSM16bit;
 
         // Test AND
         #10;
-        op_code = 6'b000110; // AND
+        op_code = 6'b010110; // AND
         a = 16'd15;
         b = 16'd7;
         #10;
@@ -419,21 +394,21 @@ module tb_FSM16bit;
 
         // Test OR
         #10;
-        op_code = 6'b001010; // OR
+        op_code = 6'b010111; // OR
         a = 16'd15;
         b = 16'd7;
         #10;
         check_result("OR", result, 16'd15, overflow_flag, carry_flag, zero_flag, negative_flag); // Expect 15 | 7 = 15
 
         #10;
-        op_code = 6'b010001; // DIV
+        op_code = 6'b010100; // DIV
         a = 16'd15;
         b = 16'd7;
         #10;
         check_division_result("DIV", result, 16'd2, remainder, 16'd1, overflow_flag, carry_flag, zero_flag, negative_flag); 
         // Test XOR
         #10;
-        op_code = 6'b001011; // XOR
+        op_code = 6'b011000; // XOR
         a = 16'd15;
         b = 16'd7;
         #10;
@@ -441,14 +416,14 @@ module tb_FSM16bit;
 
         // Test NOT
         #10;
-        op_code = 6'b001001; // NOT
+        op_code = 6'b011001; // NOT
         a = 16'd10;
         #10;
         check_result("NOT", result, 16'b1111111111110101, overflow_flag, carry_flag, zero_flag, negative_flag); // Expect ~10
 
         // Test MOV
         #10;
-        op_code = 6'b001000; // MOV
+        op_code = 6'b010010; // MOV
         a = 16'd5;
         mov_enable = 1;    // Activăm semnalul de mutare
         #10;
@@ -456,7 +431,7 @@ module tb_FSM16bit;
 
         // Test LSL
         #10;
-        op_code = 6'b001101; // LSL
+        op_code = 6'b001111; // LSL
         a = 16'd10;
         b = 16'd3; // Shift left by 3
         #10;
@@ -472,7 +447,7 @@ module tb_FSM16bit;
 
         // Test RSL
         #10;
-        op_code = 6'b001111; // RSL
+        op_code = 6'b010001; // RSL
         a = 16'd10;
         b = 16'd3; // Rotate left by 3
         #10;
@@ -488,7 +463,7 @@ module tb_FSM16bit;
 
         // Test MUL
         #10;
-        op_code = 6'b001100; // MUL
+        op_code = 6'b010011; // MUL
         a = 16'd65535;
         b = 16'd65535;
         #10;
@@ -496,7 +471,7 @@ module tb_FSM16bit;
 
         //TEST CMP
         #10;
-        op_code = 6'b000111;
+        op_code = 6'b011010;
         a = 16'd4;
         b = 16'd7;
         #10;
@@ -504,7 +479,7 @@ module tb_FSM16bit;
 
         //Test TST
         #10;
-        op_code = 6'b010010;
+        op_code = 6'b011011;
         a = 16'd5;
         b = 16'd7;
         #10;
