@@ -23,6 +23,7 @@ module cpu_block(
     wire [15:0] wire_from_sp;
     wire [15:0] wire_from_pc;
     wire [15:0] wire_from_pc_counter;
+    wire [15:0] wire_from_pc_for_data_mem;
 
     //Wires from general p register
     wire [15:0] wire_from_general_p_reg_registers;
@@ -48,13 +49,8 @@ module cpu_block(
     wire [3:0] wire_from_alu_flags;
     wire [15:0] wire_frm_alu_result_to_acc;
     wire [15:0] wire_from_alu_remainder;
-    wire wire_from_alu_bout;
-    wire wire_from_alu_cout;
     wire wire_from_alu_busy;
 
-
-    //Independent signals
-    wire bin, cin;     
 
     wire fin_file;
     wire fin_crypto;
@@ -85,6 +81,7 @@ module cpu_block(
     wire wire_from_control_unit_pc_save_address_from_data_mem;              //c13
     wire wire_from_control_unit_pc_save_address_from_counter;               //c14
     wire wire_from_control_unit_pc_send_new_address;                        //c25
+    
     //PC Counter
     wire wire_from_control_unit_increm_pc;                                  //c3
     wire wire_from_control_unit_get_address_from_pc;                        //c2
@@ -143,22 +140,25 @@ module cpu_block(
         if(c2) begin
             $display("Time: %0t  PC : %b\n",$time, wire_from_pc);
         end
-        if(c17) begin
-            $display("Time: %0t  data_a : %h   data_b : %h\n",$time, {7'b0,wire_from_instr_mem[8:0]}, wire_from_general_p_reg_registers);
+        // if(c17) begin
+        //     $display("Time: %0t  data_a : %h   data_b : %h\n",$time, {7'b0,wire_from_instr_mem[8:0]}, wire_from_general_p_reg_registers);
+        // end
+        // if(c24) begin
+        //     $display("Time: %0t  ALU : %h\n",$time, wire_frm_alu_result_to_acc);
+        // end
+        // if(c8) begin
+        //     $display("Time: %0t  ACC_data_mem : %h\n",$time, wire_from_general_p_reg_acc);
+        // end
+        // if(c5) begin
+        //     $display("Time: %0t  val_for_next_reg : %h\n",$time, wire_from_data_mem_for_reg_x_y);
+        // end
+        // if(c4) begin
+        //     $display("Time: %0t  from_register : %h\n",$time, wire_from_general_p_reg_registers);
+        // end
+        if(c13) begin
+            $display("Time: %0t  pc_from_data_mem : %h\n",$time, wire_from_data_mem_for_pc);
         end
-        if(c24) begin
-            $display("Time: %0t  ALU : %h\n",$time, wire_frm_alu_result_to_acc);
-        end
-        if(c8) begin
-            $display("Time: %0t  ACC_data_mem : %h\n",$time, wire_from_general_p_reg_acc);
-        end
-        if(c5) begin
-            $display("Time: %0t  val_for_next_reg : %h\n",$time, wire_from_data_mem_for_reg_x_y);
-        end
-        if(c4) begin
-            $display("Time: %0t  from_register : %h\n",$time, wire_from_general_p_reg_registers);
-        end
-    end
+    end 
 
     control_unit control_unit_i(
         .clk(clk), .rst(rst),
@@ -233,7 +233,8 @@ module cpu_block(
         .address_from_data_mem(wire_from_data_mem_for_pc),
         .address_from_counter_pc(wire_from_pc_counter),
 
-        .pc_out(wire_from_pc)
+        .pc_out(wire_from_pc),
+        .pc_out_for_mem(wire_from_pc_for_data_mem)
     );
 
 
@@ -245,6 +246,7 @@ module cpu_block(
         .pos(wire_from_pc[8:0]),
         .return_instr_line(wire_from_instr_mem)
     );
+
 
 
     data_mem data_mem_i(
@@ -262,7 +264,7 @@ module cpu_block(
 
         .signal_pc_data_write(wire_from_control_unit_pop),
         .sp_address(wire_from_sp[8:0]),
-        .pc_data(wire_from_pc),
+        .pc_data(wire_from_pc_for_data_mem),
         .pc_read_data(wire_from_data_mem_for_pc),
 
 
@@ -298,12 +300,8 @@ module cpu_block(
         .op_code(wire_from_instr_mem[15:10]),
         .a({7'b0,wire_from_instr_mem[8:0]}),
         .b(wire_from_general_p_reg_registers),
-        .bin(bin),
-        .cin(cin),
         .result(wire_frm_alu_result_to_acc),
         .remainder(wire_from_alu_remainder),
-        .bout(wire_from_alu_bout),
-        .cout(wire_from_alu_cout),
         .busy(wire_from_alu_busy),
         .overflow_flag(wire_from_alu_flags[0]),
         .carry_flag(wire_from_alu_flags[1]),

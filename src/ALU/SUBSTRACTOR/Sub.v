@@ -1,4 +1,3 @@
-`timescale 1ns / 1ps
 module Sub(a,b,diff,clk,rst);
 input [15:0] a,b;
 output reg [15:0] diff;
@@ -15,7 +14,6 @@ always @(posedge clk or negedge rst) begin
 
 endmodule
 
-`timescale 1ns / 1ps
 module tb_Sub;
 
     // Declarație semnale

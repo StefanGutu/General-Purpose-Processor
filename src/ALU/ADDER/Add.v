@@ -1,4 +1,3 @@
-`timescale 1ns / 1ps
 module Add(a,b,sum,clk,rst);
 input [15:0] a,b;
 output reg [15:0] sum;
@@ -15,7 +14,6 @@ always @(posedge clk or negedge rst) begin
 
 endmodule
 
-`timescale 1ns / 1ps
 module tb_Add;
 
     // Declarație semnale
