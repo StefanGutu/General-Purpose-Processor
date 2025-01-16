@@ -3,7 +3,7 @@ module ControlUnit(
     input rst,
     input [1:0] cript_or_decript,
     input bgn,
-    input [2:0] fin_counter,
+    input fin_counter,
     output reg c0,c1,c2,c3,c4,c5,c6,c7,c8,c9,c10,c11,c12,c13,c14,c15,c16,c17,c18,c19,c20,c21
 );
 
@@ -145,7 +145,7 @@ module ControlUnit(
                 next_state <= CRIPT_CHECK_COUNTER;
             end
             CRIPT_CHECK_COUNTER : begin
-                if(fin_counter < 3'b100) begin
+                if(fin_counter == 1'b1) begin
                     next_state <= CRIPT_ADD_COUNTER;
                 end
                 else begin
@@ -174,7 +174,7 @@ module ControlUnit(
                 next_state <= CRIPT_CHECK_END;
             end 
             CRIPT_CHECK_END : begin
-                if(fin_counter < 3'b100) begin
+                if(fin_counter == 1'b1) begin
                     next_state <= CRIPT_SAVE_REG;
                 end
                 else begin
@@ -201,7 +201,7 @@ module ControlUnit(
                 next_state <= DECRIPT_CHECK_COUNT;
             end 
             DECRIPT_CHECK_COUNT : begin
-                if(fin_counter < 3'b100) begin
+                if(fin_counter == 1'b1) begin
                     next_state <= DECRIPT_SUB_COUNTER;
                 end
                 else begin

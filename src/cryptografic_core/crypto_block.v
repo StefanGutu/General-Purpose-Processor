@@ -62,7 +62,7 @@ module crypto_block(
     reg [15:0] wire_to_shift_xor_or_reg;
 
     //Counter
-    wire [2:0] wire_from_counter;
+    wire wire_from_counter;
 
 
     //MixCol

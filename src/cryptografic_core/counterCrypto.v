@@ -4,7 +4,7 @@ module Counter(
     input add,
     input show_c,
     input show_d,
-    output reg [2:0] counter_out
+    output reg counter_out
 );
 
     reg [2:0] store_counter;
@@ -18,11 +18,17 @@ module Counter(
             if(add == 1'b1) begin
                 store_counter <= store_counter + 1'b1;
             end
-            if(show_c == 1'b1) begin
+            if(show_c == 1'b1 && store_counter == 3'b100) begin
+                counter_out <= 1'b1;
+            end
+            else if(show_c == 1'b1 && store_counter < 3'b100) begin
+                counter_out <= 1'b0;
+            end
+            if(show_d == 1'b1 && store_counter == 3'b100) begin
                 counter_out <= store_counter;
             end
-            if(show_d == 1'b1) begin
-                counter_out <= store_counter;
+            else if(show_d == 1'b1 && store_counter < 3'b100) begin
+                counter_out <= 1'b0;
             end
         end
     end
